@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "missingness"
+version = "0.1.0"
+description = "Values or Habits? Sensitivity of clinical time-series models to measurement changes (ETH Deep Learning HS26)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "pyarrow>=14",
+  "scikit-learn>=1.4",
+  "torch>=2.2",
+  "torchdiffeq>=0.2.3",
+  "pyyaml>=6",
+  "tqdm>=4.66",
+  "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5", "pre-commit>=3.6", "nbstripout>=0.7", "ipykernel>=6"]
+cde = ["torchcde>=0.2.5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/missingness"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

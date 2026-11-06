@@ -1,0 +1,6 @@
+# Fake data for smoke tests (src/missingness/data/synthetic.py). Never report results on it.
+name: synthetic
+task: hourly
+train_source: hospital1
+test_sources: [hospital1, hospital2]
+kwargs: {n_patients: 200, n_vars: 5, n_static: 2}

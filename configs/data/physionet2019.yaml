@@ -1,0 +1,46 @@
+# PhysioNet/CinC 2019 early sepsis prediction (Reyna et al. 2020). Hourly, causal labels.
+name: physionet2019
+task: hourly            # one label per ICU hour (SepsisLabel, positive from 6 h before onset)
+train_source: hospital1 # TODO week 1: set to the hospital that measures MORE (thinning only removes)
+test_sources: [hospital1, hospital2]
+static: [Age, Gender, Unit1, Unit2, HospAdmTime]
+variables:
+  # vital signs (8)
+  - HR
+  - O2Sat
+  - Temp
+  - SBP
+  - MAP
+  - DBP
+  - Resp
+  - EtCO2
+  # laboratory values (26)
+  - BaseExcess
+  - HCO3
+  - FiO2
+  - pH
+  - PaCO2
+  - SaO2
+  - AST
+  - BUN
+  - Alkalinephos
+  - Calcium
+  - Chloride
+  - Creatinine
+  - Bilirubin_direct
+  - Glucose
+  - Lactate
+  - Magnesium
+  - Phosphate
+  - Potassium
+  - Bilirubin_total
+  - TroponinI
+  - Hct
+  - Hgb
+  - PTT
+  - WBC
+  - Fibrinogen
+  - Platelets
+# Variables that enter the SOFA score, for the label-construction check (week 2).
+# TODO week 1: confirm against Singer et al. 2016 and the challenge's label definition.
+sofa_variables: [MAP, Platelets, Bilirubin_total, Creatinine, FiO2, SaO2]

@@ -1,0 +1,4 @@
+name: odernn
+hidden_size: 64
+ode_hidden: 64
+solver: euler   # torchdiffeq method; "dopri5" is more accurate but slower

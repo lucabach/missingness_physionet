@@ -1,0 +1,15 @@
+# mortality task, model grud. Run: python -m missingness.train configs/experiment/mortality_grud.yaml inputs=pattern seed=1
+data: physionet2012
+model: grud
+inputs: all          # values | pattern | all  (information ablation, RQ1)
+seed: 0              # model seed; we use 0, 1, 2
+split_seed: 0        # which committed split in splits/ to use; keep 0 unless decided otherwise
+train:
+  epochs: 30
+  batch_size: 64
+  lr: 1.0e-3
+  weight_decay: 0.0
+  grad_clip: 1.0
+  patience: 5        # early stopping on validation AUROC
+eval:
+  n_boot: 1000       # patient bootstrap resamples for 95% CIs
