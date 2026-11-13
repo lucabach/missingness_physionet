@@ -73,6 +73,23 @@ def records_from_frame(
     return records
 
 
+def records_to_frame(
+    records: list[PatientRecord], variables: list[str], static: list[str]
+) -> pd.DataFrame:
+    """Inverse of ``records_from_frame`` (hourly labels; a stay label is repeated per row)."""
+    frames = []
+    for r in records:
+        df = pd.DataFrame(r.values, columns=variables)
+        df.insert(0, "hour", r.hours)
+        df.insert(0, "source", r.source)
+        df.insert(0, "patient_id", r.patient_id)
+        for i, col in enumerate(static):
+            df.insert(3 + i, col, r.static[i])
+        df["label"] = r.labels if len(r.labels) == len(r.hours) else r.labels[-1]
+        frames.append(df)
+    return pd.concat(frames, ignore_index=True)
+
+
 def save_processed(df: pd.DataFrame, dataset: str, root: Path = PROCESSED_DIR) -> Path:
     path = root / dataset / "timeseries.parquet"
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -7,9 +7,9 @@ Seeds 0, 1, 2. Run names: `<dataset>_<model>_<inputs>_seed<k>` (set by `train.py
 
 | What | Output |
 | --- | --- |
-| per-variable measurement rate and inter-measurement time, hospital 1 vs 2 | `results/hospital_rates.csv` + figure |
-| LR and gradient boosting on pattern-only / values-only / time-only features, both tasks | `results/baselines.csv` |
-| SOFA-variable check: drop pattern features of SOFA variables vs same number of others | `results/sofa_check.csv` |
+| per-variable measurement rate and inter-measurement time, hospital 1 vs 2 | `results/hospital_rates.csv` + figure (done 13 Nov) |
+| LR and gradient boosting on pattern-only / values-only / time-only features, both tasks | `results/baselines.csv` (done 13 Nov, `scripts/run_baselines.py`) |
+| SOFA-variable check: drop pattern features of SOFA variables vs same number of others | `results/sofa_check.csv` (done 13 Nov) |
 
 ## E2 Information ablation (RQ1)
 
@@ -23,7 +23,7 @@ Plus tuning: 3 models × 8 configs × 2 tasks = 48 runs. Report S and Δmask per
 
 ## E3 Removal (RQ1 sensitivity, RQ2)
 
-On every trained `all` model and the matching `values` model, for p in {0.1, 0.3, 0.5}:
+On every trained `all` model and the matching `values` model, for p in {0.05, 0.10, 0.15} (proposed, Q4: larger p cannot be reached by the state-dependent rule):
 `python -m missingness.evaluate <run> --perturb random --p <p>` and `--perturb state`.
 Sensitivity = extra loss under state-dependent vs random, compared with the values-only model.
 

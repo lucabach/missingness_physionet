@@ -18,11 +18,14 @@ Never renumber; supersede an entry with a new one that says which it replaces.
 | D11 | 2026-11-13 | Luca | Train sepsis models on hospital 1 (`train_source: hospital1`); thin hospital-1 test patients toward hospital 2. Keep all 34 variables, including EtCO2 and TroponinI | Hospital 1 measures 23 of 34 variables more often (up to 45x); the 11 variables it measures less (most under 2x; EtCO2 never, TroponinI 15x less) cannot be matched by thinning and are reported as a limitation |
 | D12 | 2026-11-13 | Luca | Outcomes: sepsis (PhysioNet 2019) and in-hospital mortality (PhysioNet 2012); no kidney failure | 2,932 septic patients are enough; mortality is the contrast whose label is not built from measurements; a kidney-failure label would have to be built from creatinine values |
 | D13 | 2026-11-13 | Luca | SOFA variables for the label-construction check: MAP, Platelets, Bilirubin_total, Creatinine, FiO2 (SaO2 removed) | SaO2 is not part of SOFA; PaO2, GCS, urine output and vasopressors are not in the data |
+| D14 | 2026-11-13 | Luca | Thinning target = per-variable measurement rates of the hospital-2 test split; thinned hospital-1 test sets saved for seeds 0, 1, 2 (`scripts/build_thinned_sets.py`) | Same rates `evaluate.py --perturb thin` uses; 23 matched variables land within 0.001 of the target rate, about 15% of values removed |
 
 ## Open questions
 
 - **Q1–Q3, Q6:** resolved by D10–D13 (13 Nov).
-- **Q4 (week 2):** Is the state-dependent baseline (D5) the right one, or a causal rolling
-  baseline? On real data with p = 0.3 it only finds enough candidates for 23% (hospital 1) and
-  16% (hospital 2) of values, so both methods remove less than asked.
+- **Q4 (week 2):** Removal rule (D5). Measured on the test sets: the "extra" measurements the
+  rule can remove are only 23.8% (hospital 1) and 17.2% (hospital 2) of all values. A stricter
+  per-variable rule ("measured sooner than this patient's usual gap") gives even fewer (5.8% /
+  4.0%). So the rule is fine, but p = 0.3 or 0.5 cannot be reached. Recommendation: keep D5 and
+  use p in {0.05, 0.10, 0.15}, which both hospitals can reach in full.
 - **Q5 (week 3):** Which open-source GRU-D and ODE-RNN implementations to port.

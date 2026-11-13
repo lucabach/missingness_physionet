@@ -1,0 +1,15 @@
+variant,pattern_dropped_for,test_set,auroc_all,auroc_pre_onset
+none,,test_hospital1,0.8142294066811968,0.8075050455372853
+none,,test_hospital2,0.753143884354031,0.7423888019874789
+sofa,"MAP,Platelets,Bilirubin_total,Creatinine,FiO2",test_hospital1,0.8028795749756468,0.7981850986054422
+sofa,"MAP,Platelets,Bilirubin_total,Creatinine,FiO2",test_hospital2,0.7283475002303418,0.7154881021230683
+random0,"BUN,BaseExcess,Chloride,HCO3,Phosphate",test_hospital1,0.8166839945469675,0.8112015732115241
+random0,"BUN,BaseExcess,Chloride,HCO3,Phosphate",test_hospital2,0.7290470258593242,0.7227732120932262
+random1,"Alkalinephos,Bilirubin_direct,Chloride,Hct,Magnesium",test_hospital1,0.8154068883964742,0.8097700002631735
+random1,"Alkalinephos,Bilirubin_direct,Chloride,Hct,Magnesium",test_hospital2,0.7550619109345593,0.7443651566395655
+random2,"BUN,BaseExcess,Hct,Lactate,Potassium",test_hospital1,0.8116127185749118,0.8059296026438205
+random2,"BUN,BaseExcess,Hct,Lactate,Potassium",test_hospital2,0.712241736047717,0.7064675896871799
+random3,"HR,Lactate,PTT,Resp,TroponinI",test_hospital1,0.8106243551924442,0.8068192197349571
+random3,"HR,Lactate,PTT,Resp,TroponinI",test_hospital2,0.7513170336191186,0.7396838304926168
+random4,"AST,BaseExcess,Fibrinogen,SaO2,Temp",test_hospital1,0.8135011186238403,0.8109888324231428
+random4,"AST,BaseExcess,Fibrinogen,SaO2,Temp",test_hospital2,0.7531719416929109,0.7461160117114747
