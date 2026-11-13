@@ -6,7 +6,8 @@ files Outcomes-a.txt etc. with the column ``In-hospital_death``. Static descript
 Gender, Height, ICUType, Weight) appear at time 00:00; -1 means unknown.
 
 We put the 48 h on an hourly grid (hour 0..47), taking the mean of several measurements of
-the same variable within one hour (decision D3 in docs/decisions.md).
+the same variable within one hour (decision D3 in docs/decisions.md). Stays without a single
+time-series value (12 of 12,000) are dropped, as in Horn et al. 2020 and later benchmarks (D10).
 
 NOTE: written against the documented file format; the week-1 owner checks it on the real
 files (12,000 stays, about 14% in-hospital deaths).
@@ -60,6 +61,8 @@ def load_raw(raw_root: Path, variables: list[str], static: list[str]) -> pd.Data
         outcomes = pd.read_csv(outcome_files[0]).set_index("RecordID")["In-hospital_death"]
         for f in tqdm(sorted(set_dirs[0].glob("*.txt")), desc=f"set-{s}"):
             stay = _read_stay(f, variables, static)
+            if stay[variables].notna().sum().sum() == 0:
+                continue  # only static descriptors, no measurements (D10)
             stay["label"] = int(outcomes.loc[int(f.stem)])
             frames.append(stay)
     if not frames:

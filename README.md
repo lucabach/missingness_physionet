@@ -73,7 +73,7 @@ The full experiment matrix is in [docs/experiments.md](docs/experiments.md).
 | `src/missingness/data/` | PhysioNet loaders, `PatientRecord` format, preprocessing (x, mask, delta), splits, torch dataset |
 | `src/missingness/perturb/` | removing observations: random, state-dependent, rate-matched thinning, invariant checks |
 | `src/missingness/models/` | GRU (done), GRU-D and ODE-RNN (week 3), input variants for the ablation |
-| `src/missingness/baselines/` | logistic regression / gradient boosting checks (week 2) |
+| `src/missingness/baselines/` | causal hand-made features for the logistic regression / gradient boosting checks |
 | `src/missingness/eval/` | AUROC/AUPRC, patient bootstrap CIs, pre-onset hours, information scores S and Δmask |
 | `src/missingness/train.py`, `evaluate.py` | entry points (`python -m missingness.train ...`) |
 | `configs/` | YAML configs: `data/`, `model/`, `experiment/` |
@@ -93,10 +93,11 @@ Week-by-week plan and owners: [docs/work_plan.md](docs/work_plan.md). Latest han
 
 | Component | State |
 | --- | --- |
-| Data format, preprocessing, splits | written and unit-tested on synthetic files; **not yet run on the real data** (week 1) |
+| Data format, preprocessing, splits | run on the real data, numbers checked (`scripts/check_data.py`); splits committed |
 | Evaluation (AUROC/AUPRC, bootstrap, pre-onset) | done, tested |
-| Removal and thinning | first version, tested for invariants; definitions to review in week 2 |
-| GRU + training/evaluation scripts | done, smoke-tested |
-| Classical baselines | stub (week 2) |
+| Removal and thinning | tested for invariants; thinned hospital-1 test sets built (`scripts/build_thinned_sets.py`); removal fraction p to settle (Q4) |
+| GRU + training/evaluation scripts | done; 1-epoch real runs work (sepsis and mortality) |
+| Hospital 1 vs 2 comparison | done (`scripts/compare_hospitals.py`, `results/hospital_rates.*`) |
+| Classical baselines + SOFA check | done (`scripts/run_baselines.py`, `results/baselines.csv`, `results/sofa_check.csv`) |
 | GRU-D, ODE-RNN | stubs (week 3) |
 | Neural CDE, Transformer | extensions (week 5), not started |
