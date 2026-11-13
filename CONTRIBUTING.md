@@ -23,12 +23,14 @@ We split the core work into one-week packages (plan and owners: `docs/work_plan.
 
 ## Git workflow
 
-1. `git switch main && git pull`
+1. `git switch main && git pull`, then `bash scripts/ledger.sh` to see what the others are
+   working on (all branches).
 2. `git switch -c <name>/<topic>` (e.g. `giulio/thinning`)
 3. Commit small, meaningful steps. Message: imperative, one line, e.g. `Add rate-matched thinning`.
 4. `ruff check . && ruff format --check . && pytest` locally.
-5. Push and open a PR into `main`; fill in the template, including how to run it.
-6. One teammate reviews; CI must be green; the author merges (squash merge).
+5. Add your line to `docs/ledger.md` (rules at the top of that file).
+6. Push and open a PR into `main`; fill in the template, including how to run it.
+7. One teammate reviews; CI must be green; the author merges (squash merge).
 
 Never push to `main` directly, never commit data or checkpoints, never force-push a shared
 branch.
