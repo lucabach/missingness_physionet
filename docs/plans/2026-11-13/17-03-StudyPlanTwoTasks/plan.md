@@ -1,7 +1,8 @@
 # Study plan: same analysis on sepsis and mortality
 
-Proposal by Matteo, 13 Nov 2026, for the team to accept or change. Until it is accepted,
-`docs/experiments.md` and `docs/work_plan.md` stay as they are. Why two tasks:
+Proposal by Matteo, 13 Nov 2026. Matteo says yes to every proposed fix; the rest of the team
+confirms or objects in the pull request. Until then `docs/experiments.md` and
+`docs/work_plan.md` stay as they are. Why two tasks:
 `docs/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
 thinned test sets).
 
@@ -12,8 +13,9 @@ reproducible from its config, and safe against the problems found in the first d
 
 ## 2. Problems and fix decisions
 
-Status: **decided** (in `docs/decisions.md`), **proposed** (needs the team's yes, then gets a
-D-number), **to do** (no decision needed, only work).
+Status: **decided** (in `docs/decisions.md`), **proposed** (Matteo: yes, 13 Nov; gets a D-number
+once the team has confirmed and `luca_branchmann` is merged, to keep the numbering in one
+line), **to do** (no decision needed, only work).
 
 | # | Problem | Fix | Status |
 | --- | --- | --- | --- |

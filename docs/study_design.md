@@ -1,8 +1,8 @@
 # Study design: why the same analysis runs on sepsis and on mortality
 
 Reference for the report (sections on data, method and limitations). It gives the argument, the
-numbers behind it and a draft paragraph. Decided: two tasks (D2). Marked *proposed*: not yet
-agreed, see `docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`.
+numbers behind it and a draft paragraph. Decided: two tasks (D2). Marked *proposed*: accepted by
+Matteo, to be confirmed by the team, see `docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`.
 
 ## 1. What we want to show
 
