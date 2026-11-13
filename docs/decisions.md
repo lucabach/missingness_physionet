@@ -12,34 +12,17 @@ Never renumber; supersede an entry with a new one that says which it replaces.
 | D5 | 2026-11-06 | repo setup | State-dependent removal, first version: baseline = patient's median measurements per hour; observations above it are candidates; random removal takes the same count per patient | Follows the proposal text; week-2 owner reviews |
 | D6 | 2026-11-06 | repo setup | Thinning: per-variable keep probability target_rate / source_rate (only where source measures more) | Simplest rate matching that only removes; week-2 owner reviews |
 | D7 | 2026-11-06 | repo setup | Static covariates count as values (in `values` and `all`, not in `pattern`); missing statics → training mean | Keeps the pattern variant strictly about measurement timing |
-
 | D8 | 2026-11-13 | Luca | Splits `seed0` created and committed for both datasets (2019: 14,235/3,050/3,051 hospital-1 and 14,000/3,000/3,000 hospital-2 patients; 2012: 8,400/1,800/1,800 stays). Outcome rates are equal across splits | Implements D4 on the real data |
 | D9 | 2026-11-13 | Luca | 2019 download fetches the ~40k single files in parallel with retries (PhysioNet offers no ZIP for 2019) | The sequential wget took too long and the server drops some requests |
 | D10 | 2026-11-13 | Luca | Drop the 12 PhysioNet 2012 stays without any time-series value (IDs 140501, 140936, 141264, 142731, 142998, 143656, 145611, 147514, 150309, 150649, 155655, 156254): 11,988 stays, 1,707 deaths (14.2%). The committed split keeps its IDs; the loader skips them (8,390 / 1,798 / 1,800) | Standard practice: Horn et al. 2020 (SeFT) remove exactly these 12, Raindrop (Zhang et al. 2022) and PyPOTS/ehrdata follow; a pattern-only model sees nothing for them |
+| D11 | 2026-11-13 | Luca | Train sepsis models on hospital 1 (`train_source: hospital1`); thin hospital-1 test patients toward hospital 2. Keep all 34 variables, including EtCO2 and TroponinI | Hospital 1 measures 23 of 34 variables more often (up to 45x); the 11 variables it measures less (most under 2x; EtCO2 never, TroponinI 15x less) cannot be matched by thinning and are reported as a limitation |
+| D12 | 2026-11-13 | Luca | Outcomes: sepsis (PhysioNet 2019) and in-hospital mortality (PhysioNet 2012); no kidney failure | 2,932 septic patients are enough; mortality is the contrast whose label is not built from measurements; a kidney-failure label would have to be built from creatinine values |
+| D13 | 2026-11-13 | Luca | SOFA variables for the label-construction check: MAP, Platelets, Bilirubin_total, Creatinine, FiO2 (SaO2 removed) | SaO2 is not part of SOFA; PaO2, GCS, urine output and vasopressors are not in the data |
 
 ## Open questions
 
-- **Q1 (week 1):** Final label set: sepsis + mortality, or add kidney failure? Facts (13 Nov):
-  2,932 septic patients (hospital 1: 1,790 = 8.8%; hospital 2: 1,142 = 5.7%); 1.8% positive
-  hours overall, 1.1% on pre-onset hours; 426 septic patients are already positive at their
-  first recorded hour, so they have no negative pre-onset hours. Mortality: 1,707 deaths in
-  12,000 stays (14.2%). Kidney failure has no label in either dataset; it would have to be
-  built from creatinine (and urine output, only in 2012), so the label would come from
-  measurements even more directly than sepsis. Suggestion: keep sepsis + mortality.
-- **Q2 (week 1):** Which hospital trains for thinning? Facts (`results/hospital_rates.csv`):
-  overall both measure about equally (0.21 vs 0.19 observed values per patient-hour), but
-  per variable they differ a lot. Hospital 1 measures 23 of 34 variables more often, mostly
-  blood gases and chemistry (BaseExcess ~50x, HCO3 ~40x, Chloride ~14x, FiO2 ~6x, pH ~5x,
-  PaCO2 and PTT ~4x). Hospital 2 measures 11 more often: EtCO2 (never recorded in
-  hospital 1), TroponinI (~15x), Glucose and DBP (~1.7x). Since thinning only removes,
-  training on hospital 1 lets us match 23 variables; the other 11 stay unmatched.
-- **Q3 (week 1):** SOFA variables. SOFA has 6 parts: respiration (PaO2/FiO2), coagulation
-  (platelets), liver (bilirubin), cardiovascular (MAP or vasopressors), brain (GCS) and kidney
-  (creatinine or urine output). PhysioNet 2019 has no PaO2, GCS, urine or vasopressors.
-  Proposed list: MAP, Platelets, Bilirubin_total, Creatinine, FiO2. Drop SaO2 from the
-  current config: it is not part of SOFA.
+- **Q1–Q3, Q6:** resolved by D10–D13 (13 Nov).
 - **Q4 (week 2):** Is the state-dependent baseline (D5) the right one, or a causal rolling
   baseline? On real data with p = 0.3 it only finds enough candidates for 23% (hospital 1) and
   16% (hospital 2) of values, so both methods remove less than asked.
 - **Q5 (week 3):** Which open-source GRU-D and ODE-RNN implementations to port.
-- **Q6:** resolved by D10.

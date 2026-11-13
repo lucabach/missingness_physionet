@@ -15,8 +15,8 @@ Luca's part, branch `luca_branchmann`. Merge with the colleague's branch before 
   thinning evaluations: the whole pipeline runs end to end.
 
 ## Not done / open items
-- Q1, Q2, Q3 need a team decision (Q6 decided: D10, the 12 empty 2012 stays are dropped) (facts in `docs/decisions.md`). After Q2, set
-  `train_source` in `configs/data/physionet2019.yaml`; after Q3, fix `sofa_variables`.
+- Week-1 decisions made (D10–D13): train on hospital 1, sepsis + mortality, SOFA list without
+  SaO2, the 12 empty 2012 stays dropped. The config already reflects them.
 - `prepare_data.py --make-splits` reprocesses the raw data (~9 min); could skip if the parquet exists.
 
 ## How to run what I built
