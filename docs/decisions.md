@@ -15,6 +15,7 @@ Never renumber; supersede an entry with a new one that says which it replaces.
 
 | D8 | 2026-11-13 | Luca | Splits `seed0` created and committed for both datasets (2019: 14,235/3,050/3,051 hospital-1 and 14,000/3,000/3,000 hospital-2 patients; 2012: 8,400/1,800/1,800 stays). Outcome rates are equal across splits | Implements D4 on the real data |
 | D9 | 2026-11-13 | Luca | 2019 download fetches the ~40k single files in parallel with retries (PhysioNet offers no ZIP for 2019) | The sequential wget took too long and the server drops some requests |
+| D10 | 2026-11-13 | Luca | Drop the 12 PhysioNet 2012 stays without any time-series value (IDs 140501, 140936, 141264, 142731, 142998, 143656, 145611, 147514, 150309, 150649, 155655, 156254): 11,988 stays, 1,707 deaths (14.2%). The committed split keeps its IDs; the loader skips them (8,390 / 1,798 / 1,800) | Standard practice: Horn et al. 2020 (SeFT) remove exactly these 12, Raindrop (Zhang et al. 2022) and PyPOTS/ehrdata follow; a pattern-only model sees nothing for them |
 
 ## Open questions
 
@@ -41,5 +42,4 @@ Never renumber; supersede an entry with a new one that says which it replaces.
   baseline? On real data with p = 0.3 it only finds enough candidates for 23% (hospital 1) and
   16% (hospital 2) of values, so both methods remove less than asked.
 - **Q5 (week 3):** Which open-source GRU-D and ODE-RNN implementations to port.
-- **Q6 (week 1):** 12 PhysioNet 2012 stays have no time-series values at all, only static
-  descriptors. Keep them (current) or drop them, as several benchmark papers do?
+- **Q6:** resolved by D10.

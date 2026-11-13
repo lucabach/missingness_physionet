@@ -15,7 +15,7 @@ Luca's part, branch `luca_branchmann`. Merge with the colleague's branch before 
   thinning evaluations: the whole pipeline runs end to end.
 
 ## Not done / open items
-- Q1, Q2, Q3, Q6 need a team decision (facts in `docs/decisions.md`). After Q2, set
+- Q1, Q2, Q3 need a team decision (Q6 decided: D10, the 12 empty 2012 stays are dropped) (facts in `docs/decisions.md`). After Q2, set
   `train_source` in `configs/data/physionet2019.yaml`; after Q3, fix `sofa_variables`.
 - `prepare_data.py --make-splits` reprocesses the raw data (~9 min); could skip if the parquet exists.
 
@@ -32,7 +32,7 @@ python -m missingness.evaluate outputs/<run> --perturb state --p 0.3
 ## Results and numbers worth knowing
 | | hospital 1 | hospital 2 | PhysioNet 2012 |
 | --- | --- | --- | --- |
-| patients / stays | 20,336 | 20,000 | 12,000 |
+| patients / stays | 20,336 | 20,000 | 11,988 (12 empty stays dropped) |
 | positive patients | 1,790 (8.8%) | 1,142 (5.7%) | 1,707 deaths (14.2%) |
 | positive hours | 2.2% | 1.4% | – |
 | median stay (hours) | 39 | 38 | 48 (fixed) |
