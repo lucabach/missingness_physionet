@@ -83,7 +83,7 @@ The full experiment matrix is in [docs/experiments.md](docs/experiments.md).
 | `tests/` | pytest suite on synthetic data, runs in CI |
 | `notebooks/` | exploration only, outputs stripped |
 | `results/` | small final tables and figures for the report (raw runs stay in `outputs/`) |
-| `docs/` | overview, work plan, experiments, decision log, TA feedback, weekly handoffs, cluster notes |
+| `docs/` | overview, work plan, experiments, decision log, work ledger, TA feedback, weekly handoffs, cluster notes |
 | `CLAUDE.md` / `AGENTS.md` | instructions for AI coding agents |
 
 ## Status

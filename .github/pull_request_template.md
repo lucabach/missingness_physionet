@@ -13,4 +13,5 @@
 - [ ] No data, checkpoints or patient-level outputs committed
 - [ ] Config changes are in `configs/`, not hard-coded
 - [ ] Docs updated if behaviour changed (README, CLAUDE.md, `docs/`)
+- [ ] Line added to `docs/ledger.md`
 - [ ] Terminology follows CLAUDE.md ("sensitivity to measurement changes", "hospital 1/2")

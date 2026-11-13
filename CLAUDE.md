@@ -122,6 +122,9 @@ configs/{data,model,experiment}/   all hyperparameters live here
   trailers or "Generated with ..." lines to commits or PR descriptions.
 - **Decisions.** Any choice that changes results (preprocessing, label, split, metric,
   removal definition, model scope) gets an entry in `docs/decisions.md`.
+- **Work ledger.** Before starting, run `bash scripts/ledger.sh` to see what the others
+  are working on, on every branch. Before pushing, add your line at the bottom of
+  `docs/ledger.md` (one line per piece of work, append only; rules at the top of the file).
 - **Weekly relay.** One owner per week; on Sunday the owner writes
   `docs/handoffs/week-NN.md` from the template. Read the latest handoff before starting work.
 - **Notebooks** are for exploration; move reusable code into `src/missingness/`. Outputs are
