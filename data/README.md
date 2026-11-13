@@ -42,5 +42,7 @@ within an hour, decision D3). See `src/missingness/data/records.py`.
 
 ## Sanity numbers to check in week 1
 
-- 2019: 40,336 patients in total; about 7% septic patients and about 2% positive hours.
-- 2012: 12,000 stays; about 14% in-hospital deaths.
+- 2019: 40,336 patients in total (hospital 1: 20,336, hospital 2: 20,000); 7.3% septic patients (8.8% and 5.7%), 1.8% positive hours. Checked 13 Nov.
+- 2012: 12,000 stays; 1,707 in-hospital deaths (14.2%). Checked 13 Nov.
+
+Run `python scripts/check_data.py physionet2019 physionet2012` to reproduce.
