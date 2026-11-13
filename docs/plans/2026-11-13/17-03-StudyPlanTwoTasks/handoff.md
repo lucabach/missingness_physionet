@@ -35,6 +35,9 @@ AUROC 0.86 at 5 s per epoch on CPU.
 
 ## What can be done now, in this order
 
+These tasks are the handover list of `docs/work_plan.md`: they must be finished before week 3
+(23 Nov), when the next owner starts the deep models and the training runs.
+
 Each task: code, a test on synthetic data, `ruff` and `pytest` green, one commit. Branch from
 `matteo/phase0` (for example `matteo/phase0-cut`), small PRs.
 
@@ -48,7 +51,7 @@ Each task: code, a test on synthetic data, `ruff` and `pytest` green, one commit
 | T6 | Save the git commit in each run's `config.yaml`; a script that collects every `metrics.json` into one table in `results/`. | `train.py` or `config.py`, `scripts/collect_results.py` | one row per run, test set and metric |
 | T7 | E5 planted pattern, code only: a removal function with keep probabilities q1 (outcome) and q0 (no outcome) for one variable, a config key to apply it to train, validation and test, and a "rule off" test condition with the same overall rate. | `perturb/`, `experiment.py`, tests | removal only; same patients; with q1 = q0 the mask of that variable is unrelated to the label |
 | T8 | Pre-onset numbers with and without the 426 patients who are positive from their first hour (P8). | `experiment.score_predictions` | both reported for sepsis |
-| T9 | GRU-D (open question Q5: which implementation to port), with the input variants of the plan, section 4. | `models/grud.py`, smoke test | passes the smoke test for `values`, `pattern`, `all` |
+| T9 | Only if T1 to T8 and T10 are done (it is the week-3 owner's job, see `docs/work_plan.md`): GRU-D (open question Q5: which implementation to port), with the input variants of the plan, section 4. | `models/grud.py`, smoke test | passes the smoke test for `values`, `pattern`, `all` |
 | T10 | Mortality GRU as a pipeline check: tuning sweep and the three input variants (17 runs, under an hour locally). | configs, `outputs/` | test AUROC of `all` between 0.82 and 0.86 or an explanation. **Not a result:** runs count only after the tag `protocol-v1`. |
 
 **Numbers T2 must reproduce** (from the private check, `hour` = `ICULOS`):

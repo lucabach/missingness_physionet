@@ -1,8 +1,8 @@
 # Study plan: same analysis on sepsis and mortality
 
 Proposal by Matteo, 13 Nov 2026. Matteo says yes to every proposed fix; the rest of the team
-confirms or objects in the pull request. Until then `docs/experiments.md` and
-`docs/work_plan.md` stay as they are. Why two tasks:
+confirms or objects in the pull request. `docs/work_plan.md` already follows this plan (who does what, by which week);
+`docs/experiments.md` is updated once the team has confirmed. Why two tasks:
 `docs/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
 thinned test sets).
 

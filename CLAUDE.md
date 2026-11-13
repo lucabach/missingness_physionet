@@ -29,6 +29,7 @@ Why two tasks and how to read the results: `docs/study_design.md`.
 | Which runs exist (matrix, run counts) | `docs/experiments.md` |
 | Choices that change results | `docs/decisions.md` |
 | Who did what, on which branch | `docs/ledger.md` (list all branches with `bash scripts/ledger.sh`) |
+| Who does what in which week, and what must be ready for the next owner | `docs/work_plan.md` |
 | What happened in a week | `docs/handoffs/` |
 
 Start of a session, in this order: `bash scripts/ledger.sh`; `docs/plans/ledger.md` and the
