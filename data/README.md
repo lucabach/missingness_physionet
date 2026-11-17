@@ -38,7 +38,8 @@ data/
 One row per patient-hour: `patient_id | source | hour | <static> | <variables> | label`.
 Missing measurements are NaN. Variable and static column lists are in
 `configs/data/<dataset>.yaml`. PhysioNet 2012 is put on an hourly grid (hours 0–47, mean
-within an hour, decision D3). See `src/missingness/data/records.py`.
+within an hour, decision D3). PhysioNet 2019 is cut at ICU hour 59 when it is *loaded*
+(`max_hour` in the data config, D15); the table on disk keeps every hour. See `src/missingness/data/records.py`.
 
 ## Sanity numbers to check in week 1
 

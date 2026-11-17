@@ -1,5 +1,11 @@
 # Handoff: start of phase 0 (written 13 Nov 2026, evening)
 
+> **Update 17 Nov (Luca):** T1–T8 are done on `luca_branchmann` (PR #1), with tests, and
+> recorded as D15–D19; the T2 numbers below are reproduced exactly; the phase-1 gate passed.
+> The local branch `matteo/phase0` is no longer needed. Open: T9 (GRU-D, week 3) and the T10
+> sweep (needs Q7). Full state: `docs/handoffs/week-02.md`. Delete this file once T9 and T10
+> are done.
+
 For an agent with no memory of the earlier sessions. Read `plan.md` in this folder first; this
 file says where things stand and what to do next, in order.
 

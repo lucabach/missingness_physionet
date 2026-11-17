@@ -39,3 +39,4 @@ work. `area` is one of `data`, `perturb`, `models`, `baselines`, `eval`, `runs`,
 | 2026-11-13 | matteo+agent | matteo/ledger | docs | done | Work ledger with union merge, and `scripts/ledger.sh` to list the lines of all branches | this file |
 | 2026-11-13 | matteo+agent | (private probe repo) | analysis | start | Check of the proposal against the 2019 and 2012 data: non-septic records end at ICU hour 59, at most 10 positive hours per patient; report follows | – |
 | 2026-11-13 | matteo+agent | matteo/study-design | docs | done | Why two tasks (label and cohort caveats of the sepsis data) and a proposed study plan: 10 problems with fixes, one protocol, run order | `docs/study_design.md`, `docs/plans/` |
+| 2026-11-17 | luca+agent | luca_branchmann | data | done | Phase 0 + gate: cut at hour 59 kills the clock (time-only 0.71→0.58); after it pattern-only 0.70 vs values 0.72 (sepsis, hospital 1) | D15–D19, `docs/handoffs/week-02.md` |

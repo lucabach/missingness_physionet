@@ -72,7 +72,8 @@ pytest                                        # all tests, synthetic data, ~10 s
 ruff check . --fix && ruff format .           # lint + format (CI enforces both)
 python -m missingness.train configs/experiment/smoke.yaml        # end-to-end smoke run
 python -m missingness.train configs/experiment/<task>_<model>.yaml inputs=<values|pattern|all> seed=<0|1|2>
-python -m missingness.evaluate outputs/<run> --perturb <random|state|thin> [--p 0.3]
+python -m missingness.evaluate outputs/<run> --perturb <random|state|thin|planted_off> [--p 0.10]
+python scripts/collect_results.py                                 # all runs -> results/runs.csv
 python scripts/prepare_data.py physionet2019 physionet2012       # raw -> processed
 ```
 
@@ -90,11 +91,12 @@ src/missingness/
   data/splits.py      patient-level stratified splits (committed in splits/)
   data/dataset.py     TimeSeriesDataset + collate -> padded batch dict
   data/synthetic.py   fake data for tests only
-  perturb/            random_removal, state_dependent_removal, paired_removal,
-                      thin_to_rates, check_only_removed
+  perturb/            paired_removal (state-dependent vs matched random, D16), thin_to_rates,
+                      planted_removal / planted_off (E5), check_only_removed
   models/             build_model registry; inputs.py defines the input variants
-  baselines/          classical baselines (week 2, stub)
-  eval/               metrics (AUROC, AUPRC, patient bootstrap, pre_onset_mask), scores (S, Δmask)
+  baselines/          causal hand-made features for the classical baselines
+  eval/               metrics (AUROC, AUPRC, patient bootstrap, paired bootstrap_diff /
+                      bootstrap_contrast, pre_onset_mask), scores (S, Δmask)
   experiment.py       load_data / predict / score_predictions shared by train and evaluate
   train.py, evaluate.py   CLI entry points
 configs/{data,model,experiment}/   all hyperparameters live here

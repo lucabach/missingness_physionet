@@ -35,7 +35,7 @@ mechanism of section 1. A good pattern-only score cannot tell the three apart.
 | Why | Sepsis-3 onset (Singer et al. 2016) is the earlier of (a) the time cultures or IV antibiotics were ordered and (b) the time the SOFA score rose by 2 points. Four of the six SOFA parts need a lab result. | Almost no record of a patient without sepsis continues past ICU hour 59. |
 | Effect on the pattern | The hour the label turns on is, by definition, an hour around which tests were ordered. "Tests ordered" predicts the label even if tests were ordered at random. | (i) The hour of the stay alone predicts the label. (ii) "Not septic" means "left the ICU early", so heavy monitoring looks more specific to sepsis than it is. |
 | Evidence | Around onset the lab rate rises to 1.7–1.8 times that of comparable patients without sepsis (hospital 2: in the 6 h before onset; hospital 1: after onset). | Records past ICU hour 59: hospital 1, 644 septic and 8 not; hospital 2, 387 and 224. A model that only knows the hour of the stay reaches AUROC 0.71 (hospital 1, gradient boosting, `results/baselines.csv`). |
-| Can we fix it? | No. The order times are not released, so its size cannot be measured. | Part (i): yes, cut every record at ICU hour 59 (*proposed*). Part (ii): no. |
+| Can we fix it? | No. The order times are not released, so its size cannot be measured. | Part (i): yes, cut every record at ICU hour 59 (decided, D15). Part (ii): no. |
 
 **Same illness, different label time** (label caveat): two identical patients get worse at
 10:00. For one, cultures and labs are ordered at 11:00, for the other at 17:00. The first is
@@ -80,10 +80,10 @@ result.
 
 | Step | Removes | Status |
 | --- | --- | --- |
-| Cut every record at ICU hour 59 (training, validation, test, both hospitals) | cohort caveat, part (i) | *proposed* |
-| Report a model that sees only the hour of the stay | shows what remains of part (i) | done before the cut, repeat after |
+| Cut every record at ICU hour 59 (training, validation, test, both hospitals) | cohort caveat, part (i) | decided (D15, 17 Nov) |
+| Report a model that sees only the hour of the stay | shows what remains of part (i) | done: 0.712 before the cut, 0.582 after (gradient boosting, hospital 1) |
 | Report pre-onset hours next to all hours | the heavy testing after onset | done (invariant 6) |
-| Check the SOFA variables' pattern against other variables | bounds one part of the label caveat | done: dropping it costs 0.011 AUROC at hospital 1 (`results/sofa_check.csv`) |
+| Check the SOFA variables' pattern against other variables | bounds one part of the label caveat | done: dropping it costs 0.017 AUROC at hospital 1 after the cut (0.011 before) (`results/sofa_check.csv`) |
 
 What remains after these steps: the label caveat as a whole, and part (ii) of the cohort
 caveat. Neither can be removed with PhysioNet 2019 alone.

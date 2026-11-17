@@ -53,8 +53,8 @@ Patient splits are fixed and committed in [splits/](splits/).
 python -m missingness.train configs/experiment/sepsis_gru.yaml inputs=pattern seed=1
 
 # re-evaluate a trained run with measurements removed (no retraining)
-python -m missingness.evaluate outputs/physionet2019_gru_all_seed0 --perturb random --p 0.3
-python -m missingness.evaluate outputs/physionet2019_gru_all_seed0 --perturb state  --p 0.3
+python -m missingness.evaluate outputs/physionet2019_gru_all_seed0 --perturb random --p 0.10
+python -m missingness.evaluate outputs/physionet2019_gru_all_seed0 --perturb state  --p 0.10
 python -m missingness.evaluate outputs/physionet2019_gru_all_seed0 --perturb thin
 
 # on the cluster
@@ -95,9 +95,12 @@ Week-by-week plan and owners: [docs/work_plan.md](docs/work_plan.md). Latest han
 | --- | --- |
 | Data format, preprocessing, splits | run on the real data, numbers checked (`scripts/check_data.py`); splits committed |
 | Evaluation (AUROC/AUPRC, bootstrap, pre-onset) | done, tested |
-| Removal and thinning | tested for invariants; thinned hospital-1 test sets built (`scripts/build_thinned_sets.py`); removal fraction p to settle (Q4) |
+| Cut at ICU hour 59 (D15) | done; checked with `scripts/check_data.py` |
+| Removal and thinning | matched random vs state-dependent removal (D16), p ∈ {0.05, 0.10, 0.15} (D17), `results/removal_shares.csv`; thinned hospital-1 test sets rebuilt after the cut |
+| Paired bootstrap, results collector, git commit per run | done (D19, `scripts/collect_results.py`) |
+| Planted pattern (E5) | code and tests only; variable and q values to choose |
 | GRU + training/evaluation scripts | done; 1-epoch real runs work (sepsis and mortality) |
 | Hospital 1 vs 2 comparison | done (`scripts/compare_hospitals.py`, `results/hospital_rates.*`) |
 | Classical baselines + SOFA check | done (`scripts/run_baselines.py`, `results/baselines.csv`, `results/sofa_check.csv`) |
-| GRU-D, ODE-RNN | stubs (week 3) |
+| GRU-D, ODE-RNN | stubs (week 3, Q5) |
 | Neural CDE, Transformer | extensions (week 5), not started |
