@@ -57,3 +57,17 @@ def test_physionet2012_drops_stays_without_measurements(tmp_path):
     )
     df = physionet2012.load_raw(tmp_path, ["HR"], ["Age", "Gender", "Height", "ICUType"])
     assert df["patient_id"].unique().tolist() == ["132539"]
+
+
+def test_cut_at_hour_drops_late_rows_and_late_records():
+    import pandas as pd
+
+    from missingness.data.records import cut_at_hour
+
+    df = pd.DataFrame(
+        {"patient_id": ["a"] * 3 + ["b"] * 2, "hour": [1, 59, 60, 61, 62], "label": [0] * 5}
+    )
+    out = cut_at_hour(df, 59)
+    assert out["hour"].max() == 59
+    assert out["patient_id"].unique().tolist() == ["a"]  # b starts after 59: dropped whole
+    assert cut_at_hour(df, None).equals(df)

@@ -3,7 +3,7 @@
     python -m missingness.train configs/experiment/sepsis_gru.yaml seed=1 inputs=pattern
 
 Writes to outputs/<run_name>/:
-    config.yaml        fully resolved config (reproduce the run from this alone)
+    config.yaml        fully resolved config + git commit (reproduce the run from this alone)
     normalizer.json    training statistics
     model.pt           best checkpoint (by validation AUROC)
     metrics.json       AUROC/AUPRC with 95% CIs per test set
@@ -25,12 +25,13 @@ from missingness.eval.metrics import auroc
 from missingness.experiment import load_data, make_loader, predict, score_predictions, to_device
 from missingness.models import build_model
 from missingness.paths import OUTPUT_DIR
-from missingness.utils import get_device, set_seed
+from missingness.utils import get_device, git_commit, set_seed
 
 
 def run_name(cfg: dict) -> str:
     return cfg.get("run_name") or (
-        f"{cfg['data']['name']}_{cfg['model']['name']}_{cfg['inputs']}_seed{cfg['seed']}"
+        f"{cfg['data'].get('tag', cfg['data']['name'])}_{cfg['model']['name']}"
+        f"_{cfg['inputs']}_seed{cfg['seed']}"
     )
 
 
@@ -41,6 +42,7 @@ def train(cfg: dict) -> dict:
     tcfg = cfg["train"]
     out_dir = OUTPUT_DIR / run_name(cfg)
     out_dir.mkdir(parents=True, exist_ok=True)
+    cfg["git_commit"] = git_commit()
     save_config(cfg, out_dir / "config.yaml")
 
     sets = load_data(cfg)

@@ -49,6 +49,61 @@ def bootstrap_ci(
     return {"value": fn(y, score), "lo": float(lo), "hi": float(hi), "n_boot": len(stats)}
 
 
+def bootstrap_contrast(
+    y: np.ndarray,
+    scores: list[np.ndarray],
+    weights: list[float],
+    patient_ids: np.ndarray,
+    metric: str = "auroc",
+    n_boot: int = 1000,
+    seed: int = 0,
+    alpha: float = 0.05,
+) -> dict[str, float]:
+    """Paired bootstrap of sum_k weights[k] * metric(y, scores[k]) (plan P3).
+
+    All scores belong to the same rows (same patients, hours and labels), so every resample
+    uses the *same* patients for every model. Differences between models are then much less
+    noisy than two separate intervals suggest. Examples: Δmask = [all, values] with weights
+    [1, -1]; M2 = [all_random, all_state, values_random, values_state] with [1, -1, -1, 1].
+    """
+    fn = METRICS[metric]
+    y, patient_ids = np.asarray(y), np.asarray(patient_ids)
+    scores = [np.asarray(s) for s in scores]
+    assert len(scores) == len(weights) and all(len(s) == len(y) for s in scores)
+
+    def value(idx: np.ndarray) -> float:
+        return float(sum(w * fn(y[idx], s[idx]) for w, s in zip(weights, scores, strict=True)))
+
+    _, inverse = np.unique(patient_ids, return_inverse=True)
+    rows_of = [np.flatnonzero(inverse == k) for k in range(inverse.max() + 1)]
+    rng = np.random.default_rng(seed)
+    stats = []
+    for _ in range(n_boot):
+        pick = rng.integers(0, len(rows_of), size=len(rows_of))
+        idx = np.concatenate([rows_of[k] for k in pick])
+        if y[idx].min() == y[idx].max():
+            continue
+        stats.append(value(idx))
+    lo, hi = np.quantile(stats, [alpha / 2, 1 - alpha / 2])
+    full = np.arange(len(y))
+    return {"value": value(full), "lo": float(lo), "hi": float(hi), "n_boot": len(stats)}
+
+
+def bootstrap_diff(
+    y: np.ndarray,
+    score_a: np.ndarray,
+    score_b: np.ndarray,
+    patient_ids: np.ndarray,
+    metric: str = "auroc",
+    n_boot: int = 1000,
+    seed: int = 0,
+) -> dict[str, float]:
+    """metric(a) - metric(b) with a paired patient bootstrap (same resampled patients)."""
+    return bootstrap_contrast(
+        y, [score_a, score_b], [1.0, -1.0], patient_ids, metric, n_boot=n_boot, seed=seed
+    )
+
+
 def pre_onset_mask(
     patient_ids: np.ndarray, hours: np.ndarray, labels: np.ndarray, label_lead: float = 6.0
 ) -> np.ndarray:

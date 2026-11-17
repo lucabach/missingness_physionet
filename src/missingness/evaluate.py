@@ -3,9 +3,13 @@
     python -m missingness.evaluate outputs/<run> --perturb random --p 0.3
     python -m missingness.evaluate outputs/<run> --perturb state --p 0.3
     python -m missingness.evaluate outputs/<run> --perturb thin      # sepsis only
+    python -m missingness.evaluate outputs/<run> --perturb planted_off  # E5 runs only
 
 ``random`` and ``state`` remove the same number of values per patient (paired_removal).
+Random removal takes the same count per variable as state-dependent removal (D16).
 ``thin`` thins test_hospital1 to the measurement rates of test_hospital2.
+``planted_off`` (runs trained with a ``planted`` rule, E5): the rule switched off, i.e. the
+same share of the planted variable deleted for every patient.
 Results are written to outputs/<run>/perturbed/<perturb>[_p<p>]_seed<seed>.json.
 """
 
@@ -21,15 +25,21 @@ import yaml
 from missingness.data.preprocessing import Normalizer
 from missingness.experiment import load_data, predict, score_predictions
 from missingness.models import build_model
-from missingness.perturb import check_only_removed, measurement_rates, paired_removal, thin_to_rates
+from missingness.perturb import (
+    check_only_removed,
+    measurement_rates,
+    paired_removal,
+    planted_off,
+    thin_to_rates,
+)
 from missingness.utils import get_device
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("run_dir", type=Path)
-    ap.add_argument("--perturb", choices=["random", "state", "thin"], required=True)
-    ap.add_argument("--p", type=float, default=0.3, help="fraction removed (random/state)")
+    ap.add_argument("--perturb", choices=["random", "state", "thin", "planted_off"], required=True)
+    ap.add_argument("--p", type=float, default=0.10, help="fraction removed (random/state), D17")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -43,7 +53,20 @@ def main() -> None:
 
     sets = {k: v for k, v in load_data(cfg).items() if k.startswith("test")}
     results = {"perturb": args.perturb, "p": args.p, "seed": args.seed}
-    if args.perturb == "thin":
+    if args.perturb == "planted_off":
+        pl = cfg.get("planted")
+        if not pl:
+            raise SystemExit("planted_off needs a run trained with a `planted` block (E5)")
+        v = pl["variable"]
+        d = v if isinstance(v, int) else cfg["data"]["variables"].index(v)
+        clean = {k: v for k, v in load_data(cfg, apply_planted=False).items() if k in sets}
+        sets = {
+            f"{name}_rule_off": planted_off(recs, d, pl["q1"], pl["q0"], seed=args.seed)
+            for name, recs in clean.items()
+        }
+        for name, recs in clean.items():
+            check_only_removed(recs, sets[f"{name}_rule_off"])
+    elif args.perturb == "thin":
         src, tgt = sets["test_hospital1"], sets["test_hospital2"]
         thinned = thin_to_rates(src, measurement_rates(tgt), seed=args.seed)
         check_only_removed(src, thinned)
@@ -62,7 +85,7 @@ def main() -> None:
         pred = predict(model, records, norm, task, device)
         results[name] = score_predictions(pred, task, n_boot=cfg["eval"]["n_boot"])
 
-    tag = args.perturb if args.perturb == "thin" else f"{args.perturb}_p{args.p}"
+    tag = args.perturb if args.perturb in ("thin", "planted_off") else f"{args.perturb}_p{args.p}"
     out = args.run_dir / "perturbed" / f"{tag}_seed{args.seed}.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(results, indent=2))

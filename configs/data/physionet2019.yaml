@@ -3,6 +3,7 @@ name: physionet2019
 task: hourly            # one label per ICU hour (SepsisLabel, positive from 6 h before onset)
 train_source: hospital1 # measures more on 23 of 34 variables, so thinning can match those (D11)
 test_sources: [hospital1, hospital2]
+max_hour: 59            # cut every record at ICU hour 59: non-septic records end there (D15)
 static: [Age, Gender, Unit1, Unit2, HospAdmTime]
 variables:
   # vital signs (8)

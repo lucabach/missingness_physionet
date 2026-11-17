@@ -1,0 +1,16 @@
+# sepsis on the 25 comparable variables (plan P5), model grud. Only values and all are run (18 runs).
+# Run: python -m missingness.train configs/experiment/sepsis_comparable_grud.yaml inputs=values seed=0
+data: physionet2019_comparable
+model: grud
+inputs: all          # values | pattern | all  (information ablation, RQ1)
+seed: 0              # model seed; we use 0, 1, 2
+split_seed: 0        # which committed split in splits/ to use; keep 0 unless decided otherwise
+train:
+  epochs: 30
+  batch_size: 64
+  lr: 1.0e-3
+  weight_decay: 0.0
+  grad_clip: 1.0
+  patience: 5        # early stopping on validation AUROC
+eval:
+  n_boot: 1000       # patient bootstrap resamples for 95% CIs

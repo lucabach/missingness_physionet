@@ -14,10 +14,14 @@ from missingness.data.records import PatientRecord, load_processed
 from missingness.data.splits import load_splits, make_splits, select
 from missingness.data.synthetic import make_synthetic
 from missingness.eval.metrics import bootstrap_ci, pre_onset_mask
+from missingness.perturb.planted import planted_removal
 
 
-def load_data(cfg: dict) -> dict[str, list[PatientRecord]]:
+def load_data(cfg: dict, apply_planted: bool = True) -> dict[str, list[PatientRecord]]:
     """Return named record sets: train, val, and one or more test sets.
+
+    If the config has a ``planted`` block (experiment E5: variable, q1, q0), the planted rule
+    is applied to every set, train, validation and test alike.
 
     PhysioNet 2019: train/val come from ``data.train_source``; test sets are
     ``test_hospital1`` and ``test_hospital2`` (the test split of each hospital).
@@ -43,6 +47,15 @@ def load_data(cfg: dict) -> dict[str, list[PatientRecord]]:
             sets[f"test_{s}"] = select(records, splits["test"], s)
     else:
         sets["test"] = select(records, splits["test"])
+    planted = cfg.get("planted")
+    if planted and apply_planted:
+        v = planted["variable"]  # a name from data.variables, or a column index
+        d = v if isinstance(v, int) else data_cfg["variables"].index(v)
+        seed = planted.get("seed", 0)
+        sets = {
+            name: planted_removal(recs, d, planted["q1"], planted["q0"], seed=seed + k)
+            for k, (name, recs) in enumerate(sets.items())
+        }
     return sets
 
 
@@ -91,13 +104,22 @@ def predict(
 
 
 def score_predictions(pred: pd.DataFrame, task: str, n_boot: int = 1000) -> dict:
-    """AUROC/AUPRC with patient-bootstrap CIs; for sepsis also on pre-onset hours."""
+    """AUROC/AUPRC with patient-bootstrap CIs.
+
+    Sepsis also gets pre-onset hours, with and without the patients who are positive from
+    their first hour (P8, D18).
+    """
     out = {}
     subsets = {"all": np.ones(len(pred), dtype=bool)}
     if task == "hourly":
         subsets["pre_onset"] = pre_onset_mask(
             pred["patient_id"].to_numpy(), pred["hour"].to_numpy(), pred["label"].to_numpy()
         )
+        # P8: patients positive from their first hour have no earlier hours and an unknown
+        # onset; report pre-onset numbers without them too.
+        first = pred.sort_values("hour").groupby("patient_id")["label"].first()
+        early = pred["patient_id"].isin(first.index[first > 0]).to_numpy()
+        subsets["pre_onset_excl_positive_at_start"] = subsets["pre_onset"] & ~early
     for name, keep in subsets.items():
         p = pred[keep]
         for metric in ("auroc", "auprc"):
