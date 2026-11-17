@@ -26,7 +26,7 @@ Early sepsis prediction on PhysioNet 2019 (Reyna et al. 2020) is the natural fir
 
 ## 3. Two caveats of the sepsis data
 
-In this dataset the pattern can predict the label for two reasons that are **not** the
+In this dataset the pattern can predict the label for two further reasons besides the
 mechanism of section 1. A good pattern-only score cannot tell the three apart.
 
 | | Label caveat | Cohort caveat |
@@ -40,6 +40,41 @@ mechanism of section 1. A good pattern-only score cannot tell the three apart.
 **Same illness, different label time** (label caveat): two identical patients get worse at
 10:00. For one, cultures and labs are ordered at 11:00, for the other at 17:00. The first is
 labelled septic from 11:00, the second from 17:00. The label follows the clinician's action.
+
+### Are the two caveats part of what we study?
+
+One is, one is not. This distinction is the reason for the second task.
+
+| | What makes the pattern predictive | Tells us about the patient | Would hold for death | Part of our topic |
+| --- | --- | --- | --- | --- |
+| Mechanism of section 1 | sicker patients are measured more | yes | yes | yes |
+| Label caveat | the label is built from orders and lab results | partly | no | yes, but it supports a different claim |
+| Cohort caveat | long-stay patients without sepsis are missing | no | no | no, an artefact of the dataset |
+
+- **The label caveat is a second mechanism, not an error.** It is also about measurement
+  patterns, and a clinician's order does reflect concern about the patient. But "models use how
+  clinicians measure sick patients" is a statement about clinical data in general, and "models
+  use how the sepsis label is made" is a statement about one label definition. Sepsis alone
+  cannot say which of the two we found.
+- **With both tasks the label caveat becomes a result:** how much the pattern matters when the
+  outcome is built from measurements (sepsis) and when it is not (mortality).
+- **The cohort caveat is unrelated to clinical behaviour.** It comes from which patients were
+  put in the dataset and would not exist in a real ICU. We cut what we can and state the rest
+  as a limitation.
+
+**The label caveat is about timing, not about who gets the labs.** SOFA is not a test that is
+ordered. It is a score computed afterwards from routine values, and patients who never become
+septic have these labs almost as often (hospital 1, first 24 h, share of hours with a
+measurement; patients not yet septic in that window):
+
+| Lab | No sepsis later | Sepsis later |
+| --- | --- | --- |
+| Creatinine | 7.1 % | 8.4 % |
+| Platelets | 7.0 % | 8.2 % |
+| Bilirubin | 1.4 % | 2.1 % |
+
+What ties the pattern to the label is that the label can only turn on at an order or a lab
+result.
 
 ## 4. What we do inside the sepsis data
 
@@ -152,4 +187,4 @@ every number against the table below.
 | --- | --- |
 | Patients, outcome rates, positive hours | `scripts/check_data.py` (branch `luca_branchmann`) |
 | Baseline AUROCs, SOFA check | `results/baselines.csv`, `results/sofa_check.csv` (branch `luca_branchmann`) |
-| Records past ICU hour 59; 2,019 patients and 1.3 % after the cut; lab rate around onset | Matteo's check on the raw files, 13 Nov. Not yet reproducible in this repo: step 1 of the plan adds it to `scripts/check_data.py`. |
+| Records past ICU hour 59; 2,019 patients and 1.3 % after the cut; lab rate around onset; lab rates in the first 24 h by later sepsis | Matteo's check on the raw files, 13 Nov. Not yet reproducible in this repo: step 1 of the plan adds it to `scripts/check_data.py`. |

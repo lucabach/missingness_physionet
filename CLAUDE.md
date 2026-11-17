@@ -10,6 +10,7 @@ variable is measured carries information (sicker patients are tested more). We m
 (1) how much predictive information the measurement pattern carries, (2) how sensitive
 trained GRU, GRU-D and ODE-RNN models are to changes in it, and (3) whether that sensitivity
 goes with larger losses at another hospital. Full proposal summary: `docs/project_overview.md`.
+Why two tasks and how to read the results: `docs/study_design.md`.
 
 - **Tasks:** causal hourly sepsis prediction (PhysioNet 2019, two hospital systems) and
   in-hospital mortality from the first 48 h (PhysioNet 2012).
@@ -18,6 +19,50 @@ goes with larger losses at another hospital. Full proposal summary: `docs/projec
 - **Experiments:** information ablation (values / pattern / all inputs), test-time removal
   (random vs state-dependent), rate-matched thinning of the same patients, cross-hospital
   transfer. Matrix: `docs/experiments.md`.
+
+## Where the plan and the method live (read at the start of every session)
+
+| You want to know | Read |
+| --- | --- |
+| Why we run sepsis **and** mortality, what each result may be taken to mean, text for the report | `docs/study_design.md` |
+| What to do next, in which order, and the protocol every run follows | the active plan: `docs/plans/ledger.md` → its `plan.md`, `status.md`, and `handoff.md` if there is one |
+| Which runs exist (matrix, run counts) | `docs/experiments.md` |
+| Choices that change results | `docs/decisions.md` |
+| Who did what, on which branch | `docs/ledger.md` (list all branches with `bash scripts/ledger.sh`) |
+| Who does what in which week, and what must be ready for the next owner | `docs/work_plan.md` |
+| What happened in a week | `docs/handoffs/` |
+
+Start of a session, in this order: `bash scripts/ledger.sh`; `docs/plans/ledger.md` and the
+`status.md` (and `handoff.md`) of each active plan; the latest `docs/handoffs/week-NN.md`.
+
+**Two files are called ledger. They are different things.**
+
+- `docs/plans/ledger.md` is the **index of plans**: what we intend to do. Two sections, Active
+  and Noteworthy finished, one link per plan.
+- `docs/ledger.md` is the **work ledger**: what was done, by whom, on which branch. One line
+  per piece of work, append only.
+
+**How a plan is stored.**
+
+```
+docs/plans/
+  ledger.md                          index of plans
+  YYYY-MM-DD/HH-MM-ShortName/        day and time the plan was created
+    plan.md                          goal, approach, steps; update it when the plan changes
+    status.md                        first line "Status: active | done | dropped"; done, next, blockers
+    handoff.md                       only while work is handed to another session; delete when done
+```
+
+Keep `status.md` current as the work moves. A new plan gets a line under Active in
+`docs/plans/ledger.md`; a finished one leaves Active.
+
+**The method for all runs** is in the active study plan
+(`docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`): problems and their fixes (section
+2), one protocol for both tasks (section 4), the four primary measures M1–M4 (section 4), the
+order of work with gates (section 5), the shift experiments (section 6) and the rules for runs
+(section 7). Where that plan and `docs/experiments.md` or `docs/work_plan.md` disagree, the
+plan is the newer proposal; items it marks as "proposed" are not decisions until they have a
+D-number, so ask a human before acting on them.
 
 ## Commands
 
