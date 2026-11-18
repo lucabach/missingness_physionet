@@ -19,6 +19,12 @@ import numpy as np
 from missingness.data.records import PatientRecord
 
 
+def planted_index(planted: dict, variables: list[str]) -> int:
+    """Column of the planted variable; the config gives a name from data.variables or an index."""
+    v = planted["variable"]
+    return v if isinstance(v, int) else variables.index(v)
+
+
 def _keep(record: PatientRecord, d: int, prob: float, rng: np.random.Generator) -> PatientRecord:
     v = record.values.copy()
     drop = ~np.isnan(v[:, d]) & (rng.random(len(v)) >= prob)

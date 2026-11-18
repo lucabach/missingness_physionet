@@ -88,3 +88,23 @@ def test_tuning_run_leaves_test_sets_unscored(tmp_path, monkeypatch):
     metrics = train.train(cfg)
     assert set(metrics) == {"val_auroc", "epochs"}
 
+
+def test_evaluate_run_does_several_perturbations_and_skips_done_ones(tmp_path, monkeypatch):
+    from missingness.evaluate import evaluate_run
+
+    monkeypatch.setattr(train, "OUTPUT_DIR", tmp_path)
+    cfg = load_config(
+        paths.CONFIG_DIR / "experiment" / "smoke.yaml",
+        ["train.epochs=1", "eval.n_boot=10", "run_name=run"],
+    )
+    train.train(cfg)
+    jobs = [("random", 0.1, 0), ("state", 0.1, 0), ("thin", None, 1)]
+    written = evaluate_run(tmp_path / "run", jobs)
+    assert [f.name for f in written] == [
+        "random_p0.1_seed0.json",
+        "state_p0.1_seed0.json",
+        "thin_seed1.json",
+    ]
+    preds = tmp_path / "run" / "perturbed" / "state_p0.1_seed0" / "test_hospital2.parquet"
+    assert preds.exists()
+    assert evaluate_run(tmp_path / "run", jobs) == []  # already done
