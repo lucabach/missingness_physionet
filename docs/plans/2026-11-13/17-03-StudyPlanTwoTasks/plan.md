@@ -19,14 +19,14 @@ line), **to do** (no decision needed, only work).
 
 | # | Problem | Fix | Status |
 | --- | --- | --- | --- |
-| P1 | Records of patients without sepsis end at ICU hour 59, so the hour of the stay predicts the label (AUROC 0.71 from the hour alone). | Cut all PhysioNet 2019 records at ICU hour 59, in training, validation and test. Repeat the baselines after the cut. | proposed |
+| P1 | Records of patients without sepsis end at ICU hour 59, so the hour of the stay predicts the label (AUROC 0.71 from the hour alone). | Cut all PhysioNet 2019 records at ICU hour 59, in training, validation and test. Repeat the baselines after the cut. | decided (D15) |
 | P2 | The sepsis label is built from clinicians' orders and lab results. | Same analysis on mortality (D2, D12). State what remains as a limitation. | decided |
-| P3 | Few patients with the outcome in a test set (about 180, 120 and 256), so one AUROC is uncertain by about ±0.04. | Report differences between two models on the same resampled patients (paired bootstrap). Seeds 0–2; add seeds 3–4 only where a primary measure is unclear. | to do |
-| P4 | Nothing shows that our sensitivity measure detects a model that depends on the pattern. | New experiment E5: a planted pattern on real records (section 6). | proposed |
-| P5 | Thinning to hospital 2's rates mostly deletes variables that hospital 2 hardly records. | Keep D11 and D14 (all 34 variables). Add a contrast on the 25 variables both hospitals record at a comparable rate (section 6). | proposed |
-| P6 | State-dependent removal deletes mostly labs, random removal mostly vitals, so they differ in more than the choice of hours. | Random removal takes the same number of values **per variable** as state-dependent removal; only the hours differ. p in {0.05, 0.10, 0.15} (Q4). | proposed |
+| P3 | Few patients with the outcome in a test set (about 180, 120 and 256), so one AUROC is uncertain by about ±0.04. | Report differences between two models on the same resampled patients (paired bootstrap). Seeds 0–2; add seeds 3–4 only where a primary measure is unclear. | decided (D19) |
+| P4 | Nothing shows that our sensitivity measure detects a model that depends on the pattern. | New experiment E5: a planted pattern on real records (section 6). | decided (D21) |
+| P5 | Thinning to hospital 2's rates mostly deletes variables that hospital 2 hardly records. | Keep D11 and D14 (all 34 variables). Add a contrast on the 25 variables both hospitals record at a comparable rate (section 6). | decided (D22) |
+| P6 | State-dependent removal deletes mostly labs, random removal mostly vitals, so they differ in more than the choice of hours. | Random removal takes the same number of values **per variable** as state-dependent removal; only the hours differ. p in {0.05, 0.10, 0.15} (Q4). | decided (D16, D17) |
 | P7 | "Values only" and "pattern only" are not defined for GRU-D and ODE-RNN. | Write the definitions (table in section 4) before the two models are implemented. | to do |
-| P8 | 426 septic patients are positive from their first hour: no earlier hours, onset time unknown. | Keep them in training and in the all-hours numbers. Report pre-onset numbers with and without them. | proposed |
+| P8 | 426 septic patients are positive from their first hour: no earlier hours, onset time unknown. | Keep them in training and in the all-hours numbers. Report pre-onset numbers with and without them. | decided (D18) |
 | P9 | Three motivating numbers come from 2026 preprints nobody has checked. | Read Nie et al., Gupta et al. and Tranchellini et al. before the report. | to do |
 | P10 | The title and some wording promise more than the design can show. | Soften the title; say "change in measurement density" for thinning; say that irregular sampling times are out of scope. | to do |
 
@@ -45,6 +45,10 @@ change of policy; the hourly grid.
 | Hour-59 finding, caveats, this plan, work ledger | Matteo |
 
 Not started: GRU-D, ODE-RNN, tuning, all training runs.
+
+Since then (see `status.md`): phase 0 and the phase-1 gate done (17 Nov, Luca); the protocol
+frozen as `protocol-v1` with D20–D23 (18 Nov, Matteo); the GRU runs of both tasks moved to
+week 2 (plan `docs/plans/2026-11-18/23-11-Week2GruRunsAndHandoff/`).
 
 ## 4. One protocol for both tasks
 

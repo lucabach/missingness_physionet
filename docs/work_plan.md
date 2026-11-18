@@ -1,10 +1,11 @@
 # Work plan: one week each
 
-Updated 13 Nov 2026 to follow the study plan
-(`docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`): what each week does, in which order,
-and what must be ready before the next owner starts. The team's
-[work-split doc](https://claude.ai/artifact/Tk79134ft9RDc12DqzFJkR) still shows the first version; its owner
-should update it. Fill in the owners of weeks 3 and 4.
+Updated 18 Nov 2026: every GRU run moves to week 2 (they run on a laptop CPU after the cut at
+hour 59); Giulio owns week 3 and does GRU-D and ODE-RNN with the same scripts. The method is
+the study plan (`docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`); this week's plan is
+`docs/plans/2026-11-18/23-11-Week2GruRunsAndHandoff/`. The team's
+[work-split doc](https://claude.ai/artifact/Tk79134ft9RDc12DqzFJkR) still shows the first
+version; its owner should update it. Fill in the owner of week 4.
 
 By the end of week 4 all core experiments should be done (about 75% of the project); the
 report, final figures and extensions remain.
@@ -12,9 +13,9 @@ report, final figures and extensions remain.
 | Week | Dates | Owner | Focus | Done when | Code |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 9–15 Nov | Luca, Matteo | Data pipeline and hospital comparison | **Done 13 Nov** (PR #1): both datasets load; splits committed (D8); outcomes settled (D12); hospitals compared, train on hospital 1 (D11). Data checks that changed the plan: `docs/study_design.md`. | `data/`, `scripts/`, `splits/`, `eval/` |
-| 2 | 16–22 Nov | Luca, Matteo | Baselines, removal and thinning, **and making the pipeline safe (plan phases 0 and 1)** | Done 13 Nov (PR #1): baselines, SOFA check, removal review, thinned test sets. **17 Nov:** handover items 2–6 done, 7 as proposals, 8 partly; still open: merge PR #1, Q7–Q9, tag `protocol-v1` (see `docs/handoffs/week-02.md`). | `baselines/`, `perturb/`, `eval/`, `data/` |
-| 3 | 23–29 Nov | _tbd_ | Deep models, tuning, training runs (plan phases 2 to 4) | GRU-D and ODE-RNN in the one training script, with the input variants of the plan (section 4); tuning sweep on the validation split (8 configs per model and task); **mortality first:** 27 runs, `all` AUROC checked against published numbers; **then sepsis trained on hospital 1:** 27 runs, plus 18 runs on the 25 comparable variables; everything submitted before handing over | `models/`, `slurm/` |
-| 4 | 30 Nov–6 Dec | _tbd_ | All core results (plan phase 5) | Results collected into one table; measures M1 to M4 with paired intervals; removal evaluation for both tasks; planted pattern on mortality (36 short runs, then rule on / rule off); thinned and hospital-2 evaluation for sepsis; result figures and a two-page results note | `evaluate.py`, `perturb/`, `results/` |
+| 2 | 16–22 Nov | Luca, Matteo | Baselines, removal and thinning, making the pipeline safe (plan phases 0 and 1), **and every GRU run (phases 2, 4 and 5 for GRU)** | 17 Nov (Luca, PR #1): phase 0, gate passed, D15–D19. 18–22 Nov (Matteo): protocol frozen (D20–D23, tag `protocol-v1`); GRU on both tasks: tuning, 9 runs per task, planted pattern (24 runs), 25 variables (6 runs), removal and thinning evaluation, measures M1–M4; first conclusions and questions for Sarah (`docs/conclusions.md`); handoff `docs/handoffs/week-02.md` | `eval/`, `scripts/`, `slurm/`, `configs/` |
+| 3 | 23–29 Nov | Giulio | GRU-D and ODE-RNN (plan phases 3 and 4 for these two models) | Both models implemented with the input variants of the plan (section 4), tested on synthetic data (Q5: which implementation); for each model, with the same scripts as the GRU: mortality tuning (8), 9 runs, planted pattern (24); sepsis tuning (8), 9 runs, 25 variables (6); `scripts/evaluate_runs.py` on every run; everything submitted before handing over | `models/`, `slurm/` |
+| 4 | 30 Nov–6 Dec | _tbd_ | All core results (plan phase 5) | `scripts/measures.py` for all three models; results table and figures from `results/runs.csv` and `results/measures.csv`; the GRU conclusions in `docs/conclusions.md` extended to GRU-D and ODE-RNN; a two-page results note | `scripts/`, `results/`, `docs/` |
 | 5 | | | Only if time is left (plan phase 6): sepsis trained on hospital 2 (27 runs), more seeds where a primary measure is unclear; reruns | | |
 | 6 | | | Final analysis, figures, tables | | |
 | 7 | | | Full report draft, starting from `docs/study_design.md` | | |

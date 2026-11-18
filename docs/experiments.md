@@ -24,15 +24,17 @@ No run counts as a result before the tag `protocol-v1`. Collect results with
 | mortality (first) | gru, grud, odernn | values, pattern, all | 3 | – | 27 |
 | sepsis | gru, grud, odernn | values, pattern, all | 3 | hospital 1 (D11) | 27 |
 
-Plus tuning: 3 models × 8 configs × 2 tasks = 48 runs (`slurm/submit_tuning.sh`, grid still
-to confirm). Report S and Δmask per model (`eval/scores.py`), Δmask with a paired bootstrap
-(`eval.bootstrap_diff`). GRU-D "values" = plain GRU.
+Plus tuning (D20): 3 models × 8 configs × 2 tasks = 48 runs, and 8 more per task for the GRU
+`values` check. `slurm/submit_tuning.sh <task> <model>`, then `python scripts/pick_config.py
+<task> <model> --write` freezes the choice in the experiment config. Then
+`slurm/submit_ablations.sh <task>` (`MODELS=gru LOCAL=1` for one model on a laptop).
+Report S and Δmask per model (M1, `scripts/measures.py`). GRU-D "values" = plain GRU.
 
 ## E3 Removal (RQ1 sensitivity, RQ2)
 
 On every trained `all` model and the matching `values` model, for p in {0.05, 0.10, 0.15}
-(D17; p = 0.10 is the primary level, measure M2):
-`python -m missingness.evaluate <run> --perturb random --p <p>` and `--perturb state`.
+(D17; p = 0.10 is the primary level, measure M2), removal seed 0 for every model (D23):
+`python scripts/evaluate_runs.py` runs these for every finished run.
 Random removal takes the same number of values per variable as state-dependent removal (D16).
 Sensitivity (M2) = (loss under state-dependent − loss under random) for `all`, minus the same
 for `values`, with a paired bootstrap (`eval.bootstrap_contrast`, weights [1, −1, −1, 1]).
@@ -44,19 +46,35 @@ Train on the hospital that measures more (`data.train_source`, decided in week 1
 (`--perturb thin`), (c) the other hospital (`test_hospital2` in `metrics.json`).
 Relate (a)−(b) and (a)−(c) losses to sensitivity scores, as an exploratory association (M4).
 
-Contrast on the 25 variables both hospitals measure at a comparable rate (plan P5, proposed):
-3 models × `values`, `all` × 3 seeds = 18 runs with `configs/experiment/sepsis_comparable_<model>.yaml`.
+Thinning seeds 0, 1, 2 for every sepsis `all` and `values` run (`scripts/evaluate_runs.py`).
 
-## E5 Planted pattern (plan P4, proposed; code ready, no runs)
+Contrast on the 25 variables both hospitals measure at a comparable rate (D22): 3 models ×
+`values`, `all` × 3 seeds = 18 runs, `INPUTS="values all" bash slurm/submit_ablations.sh
+sepsis_comparable` (uses the sepsis tuned configuration).
 
-On real mortality records, keep the measurements of one variable with probability q1 for
-patients who died and q0 for the others (`perturb/planted.py`), in train, validation and test.
-Strength q1/q0 ∈ {1, 1.5, 2, 4}; 3 models × 4 strengths × 3 seeds = 36 runs. Set it with a
-`planted:` block in the experiment config (`variable`, `q1`, `q0`); test the rule switched off
-with `python -m missingness.evaluate <run> --perturb planted_off`. Still to choose: the
-variable (proposal HR) and q1 (proposal 1.0, so q0 = 1/strength).
+## E5 Planted pattern (plan P4, D21)
 
-## Compute budget (proposal table)
+On real mortality records, keep the HR measurements with probability q1 = 1.0 for patients
+who died and q0 = 1/strength for the others (`perturb/planted.py`), in train, validation and
+test. Strength {1, 1.5, 2, 4}; `all` and `values` × 4 strengths × 3 seeds = 24 runs per model
+(`slurm/submit_planted.sh`, `MODELS=gru LOCAL=1` for one model). Run names carry the rule
+(`physionet2012_gru_all_plantedHR-s2_seed0`). Rule off (`planted_off`) is evaluated by
+`scripts/evaluate_runs.py`.
 
-~15 min per GRU-type run and ~25 min per ODE-RNN run on PhysioNet 2019, about a third on
-2012; core ≈ 35 GPU-hours. Evaluations reuse trained models.
+## Standard evaluation and measures (D23)
+
+```bash
+python scripts/evaluate_runs.py      # removal, thinning, rule off for every finished run
+python scripts/collect_results.py    # every score -> results/runs.csv
+python scripts/measures.py           # M1-M4 -> results/measures.csv
+```
+
+Each measure is a mean over seeds with a paired patient bootstrap (definitions in the
+docstring of `scripts/measures.py` and the study plan, section 4).
+
+## Compute budget
+
+Proposal: ~15 min per GRU-type run and ~25 min per ODE-RNN run on PhysioNet 2019, about a
+third on 2012; core ≈ 35 GPU-hours. Measured 18 Nov on a laptop CPU (14 cores) after the cut:
+sepsis GRU 11 s per epoch, mortality GRU about 4 s; loading the sepsis data 36 s; scoring one
+sepsis test set 13 s. Every GRU run fits on a laptop.
