@@ -110,8 +110,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("experiment", help="path to configs/experiment/*.yaml")
     parser.add_argument("overrides", nargs="*", help="key.sub=value overrides")
+    parser.add_argument("--skip-done", action="store_true", help="skip if metrics.json exists")
     args = parser.parse_args()
-    train(load_config(args.experiment, args.overrides))
+    cfg = load_config(args.experiment, args.overrides)
+    if args.skip_done and (OUTPUT_DIR / run_name(cfg) / "metrics.json").exists():
+        print(f"skip {run_name(cfg)} (done)")
+        return
+    train(cfg)
 
 
 if __name__ == "__main__":
