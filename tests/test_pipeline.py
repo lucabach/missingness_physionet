@@ -108,3 +108,16 @@ def test_evaluate_run_does_several_perturbations_and_skips_done_ones(tmp_path, m
     preds = tmp_path / "run" / "perturbed" / "state_p0.1_seed0" / "test_hospital2.parquet"
     assert preds.exists()
     assert evaluate_run(tmp_path / "run", jobs) == []  # already done
+
+
+def test_tuned_block_sets_values_and_command_line_still_wins(tmp_path):
+    exp = tmp_path / "exp.yaml"
+    exp.write_text(
+        "data: synthetic\nmodel: gru\ninputs: all\nseed: 0\n"
+        "train: {lr: 1.0e-3, weight_decay: 0.0}\n"
+        "tuned:\n  model.hidden_size: 128\n  train.lr: 3.0e-4\n  train.weight_decay: 1.0e-5\n"
+    )
+    cfg = load_config(exp)
+    assert cfg["model"]["hidden_size"] == 128 and cfg["train"]["lr"] == 3e-4
+    assert cfg["train"]["weight_decay"] == 1e-5
+    assert load_config(exp, ["train.lr=1.0e-3"])["train"]["lr"] == 1e-3
