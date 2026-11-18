@@ -114,6 +114,21 @@ def predict(
     return pd.concat(rows, ignore_index=True)
 
 
+def eval_subsets(pred: pd.DataFrame, task: str) -> dict[str, np.ndarray]:
+    """Row masks of the reported subsets: all rows; for sepsis also the pre-onset hours, with
+    and without the patients who are positive from their first hour (P8, D18)."""
+    subsets = {"all": np.ones(len(pred), dtype=bool)}
+    if task == "hourly":
+        subsets["pre_onset"] = pre_onset_mask(
+            pred["patient_id"].to_numpy(), pred["hour"].to_numpy(), pred["label"].to_numpy()
+        )
+        # Patients positive from their first hour have no earlier hours and an unknown onset.
+        first = pred.sort_values("hour").groupby("patient_id")["label"].first()
+        early = pred["patient_id"].isin(first.index[first > 0]).to_numpy()
+        subsets["pre_onset_excl_positive_at_start"] = subsets["pre_onset"] & ~early
+    return subsets
+
+
 def score_predictions(pred: pd.DataFrame, task: str, n_boot: int = 1000) -> dict:
     """AUROC/AUPRC with patient-bootstrap CIs.
 
@@ -121,17 +136,7 @@ def score_predictions(pred: pd.DataFrame, task: str, n_boot: int = 1000) -> dict
     their first hour (P8, D18).
     """
     out = {}
-    subsets = {"all": np.ones(len(pred), dtype=bool)}
-    if task == "hourly":
-        subsets["pre_onset"] = pre_onset_mask(
-            pred["patient_id"].to_numpy(), pred["hour"].to_numpy(), pred["label"].to_numpy()
-        )
-        # P8: patients positive from their first hour have no earlier hours and an unknown
-        # onset; report pre-onset numbers without them too.
-        first = pred.sort_values("hour").groupby("patient_id")["label"].first()
-        early = pred["patient_id"].isin(first.index[first > 0]).to_numpy()
-        subsets["pre_onset_excl_positive_at_start"] = subsets["pre_onset"] & ~early
-    for name, keep in subsets.items():
+    for name, keep in eval_subsets(pred, task).items():
         p = pred[keep]
         for metric in ("auroc", "auprc"):
             out[f"{name}/{metric}"] = bootstrap_ci(

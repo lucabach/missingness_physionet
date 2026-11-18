@@ -65,7 +65,8 @@ def bootstrap_contrast(
     n_boot: int = 1000,
     seed: int = 0,
     alpha: float = 0.05,
-) -> dict[str, float]:
+    keep_draws: bool = False,
+) -> dict:
     """Paired bootstrap of sum_k weights[k] * metric(y, scores[k]) (plan P3).
 
     All scores belong to the same rows (same patients, hours and labels), so every resample
@@ -75,6 +76,8 @@ def bootstrap_contrast(
 
     A resample is a weight per patient (how often it was drawn), applied to all its rows; this
     gives the same numbers as copying the rows, without re-sorting them for every draw.
+    ``keep_draws`` adds the bootstrap values under ``draws`` (to combine independent samples,
+    e.g. two hospitals).
     """
     fn = METRICS[metric]
     y, patient_ids = np.asarray(y, dtype=float), np.asarray(patient_ids)
@@ -100,7 +103,10 @@ def bootstrap_contrast(
         )
     lo, hi = np.quantile(stats, [alpha / 2, 1 - alpha / 2])
     value = float(sum(k * fn(y, s) for k, s in zip(weights, scores, strict=True)))
-    return {"value": value, "lo": float(lo), "hi": float(hi), "n_boot": len(stats)}
+    out = {"value": value, "lo": float(lo), "hi": float(hi), "n_boot": len(stats)}
+    if keep_draws:
+        out["draws"] = np.asarray(stats)
+    return out
 
 
 def bootstrap_diff(
