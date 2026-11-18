@@ -57,11 +57,13 @@ def perturb_sets(
     perturb: str,
     p: float | None,
     seed: int,
+    cache: dict | None = None,
 ) -> tuple[dict[str, list[PatientRecord]], dict]:
     """Perturbed test sets for one evaluation, each checked with ``check_only_removed``.
 
     ``tests`` are the run's test sets as trained (planted rule on for E5 runs); ``clean`` are
-    the same sets without the planted rule (only needed for ``planted_off``).
+    the same sets without the planted rule (only needed for ``planted_off``). ``cache`` keeps
+    the paired removal of a (p, seed), so random and state-dependent share one computation.
     """
     extra: dict = {}
     if perturb == "planted_off":
@@ -82,8 +84,11 @@ def perturb_sets(
         check_only_removed(src, thinned)
         return {"test_hospital1_thinned": thinned}, extra
     out = {}
+    cache = {} if cache is None else cache
     for name, records in tests.items():
-        rand, state, achieved = paired_removal(records, p, seed=seed)
+        if (name, p, seed) not in cache:
+            cache[(name, p, seed)] = paired_removal(records, p, seed=seed)
+        rand, state, achieved = cache[(name, p, seed)]
         chosen = rand if perturb == "random" else state
         check_only_removed(records, chosen)
         out[name] = chosen
@@ -117,9 +122,11 @@ def evaluate_run(
     if planted:
         tests = {k: v for k, v in with_planted(cfg, everything).items() if k.startswith("test")}
 
-    written = []
+    written, cache = [], {}
     for perturb, p, seed in todo:
-        sets, results = perturb_sets(cfg, tests, clean if planted else None, perturb, p, seed)
+        sets, results = perturb_sets(
+            cfg, tests, clean if planted else None, perturb, p, seed, cache
+        )
         results = {"perturb": perturb, "p": p, "seed": seed} | results
         pred_dir = run_dir / "perturbed" / result_tag(perturb, p, seed)
         pred_dir.mkdir(parents=True, exist_ok=True)
