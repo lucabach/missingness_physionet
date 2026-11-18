@@ -68,3 +68,23 @@ def test_planted_run_and_rule_off_evaluation(tmp_path, monkeypatch):
     assert out.returncode == 0, out.stderr
     res = json.loads((tmp_path / "planted" / "perturbed" / "planted_off_seed0.json").read_text())
     assert "test_hospital1_rule_off" in res
+
+
+def test_run_names_keep_planted_and_plain_runs_apart():
+    cfg = load_config(paths.CONFIG_DIR / "experiment" / "mortality_gru.yaml", ["seed=1"])
+    assert train.run_name(cfg) == "physionet2012_gru_all_seed1"
+    cfg["planted"] = {"variable": "HR", "q1": 1.0, "q0": 1 / 1.5}
+    assert train.run_name(cfg) == "physionet2012_gru_all_plantedHR-s1.5_seed1"
+    comparable = load_config(paths.CONFIG_DIR / "experiment" / "sepsis_comparable_gru.yaml")
+    assert train.run_name(comparable) == "physionet2019_comparable_gru_all_seed0"
+
+
+def test_tuning_run_leaves_test_sets_unscored(tmp_path, monkeypatch):
+    monkeypatch.setattr(train, "OUTPUT_DIR", tmp_path)
+    cfg = load_config(
+        paths.CONFIG_DIR / "experiment" / "smoke.yaml",
+        ["train.epochs=1", "eval.test=false", "run_name=tune_smoke"],
+    )
+    metrics = train.train(cfg)
+    assert set(metrics) == {"val_auroc", "epochs"}
+

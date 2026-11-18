@@ -28,10 +28,19 @@ from missingness.paths import OUTPUT_DIR
 from missingness.utils import get_device, git_commit, set_seed
 
 
+def planted_tag(cfg: dict) -> str:
+    """'' for a normal run; '_planted<variable>-s<q1/q0>' for an E5 run (planted pattern)."""
+    pl = cfg.get("planted")
+    if not pl:
+        return ""
+    return f"_planted{pl['variable']}-s{pl['q1'] / pl['q0']:.3g}"
+
+
 def run_name(cfg: dict) -> str:
+    """outputs/<run_name>: data tag, model, inputs, planted rule (E5 only), seed."""
     return cfg.get("run_name") or (
         f"{cfg['data'].get('tag', cfg['data']['name'])}_{cfg['model']['name']}"
-        f"_{cfg['inputs']}_seed{cfg['seed']}"
+        f"_{cfg['inputs']}{planted_tag(cfg)}_seed{cfg['seed']}"
     )
 
 
@@ -82,11 +91,12 @@ def train(cfg: dict) -> dict:
             if patience >= tcfg["patience"]:
                 break
 
-    model.load_state_dict(torch.load(out_dir / "model.pt", map_location=device))
-    metrics = {"val_auroc": best}
+    model.load_state_dict(torch.load(out_dir / "model.pt", map_location=device, weights_only=True))
+    metrics = {"val_auroc": best, "epochs": epoch + 1}
     (out_dir / "predictions").mkdir(exist_ok=True)
+    # Tuning runs set eval.test=false: the test split stays unused until tuning is frozen.
     for name, records in sets.items():
-        if not name.startswith("test"):
+        if not name.startswith("test") or not cfg["eval"].get("test", True):
             continue
         pred = predict(model, records, norm, task, device)
         pred.to_parquet(out_dir / "predictions" / f"{name}.parquet", index=False)
