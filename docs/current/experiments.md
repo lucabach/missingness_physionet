@@ -83,4 +83,6 @@ docstring of `scripts/measures.py` and the study plan, section 4).
 Proposal: ~15 min per GRU-type run and ~25 min per ODE-RNN run on PhysioNet 2019, about a
 third on 2012; core ≈ 35 GPU-hours. Measured 18 Nov on a laptop CPU (14 cores) after the cut:
 sepsis GRU 11 s per epoch, mortality GRU about 4 s; loading the sepsis data 36 s; scoring one
-sepsis test set 13 s. Every GRU run fits on a laptop.
+sepsis test set 13 s. Every GRU run fits on a laptop: the 104 GRU runs of week 2 and their
+standard evaluation take roughly 7 hours of one chain (two chains in parallel slow each
+other down 2–3x); `scripts/measures.py` takes about 20 minutes per model.
