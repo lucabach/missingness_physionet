@@ -1,9 +1,9 @@
 # Study plan: same analysis on sepsis and mortality
 
 Proposal by Matteo, 13 Nov 2026. Matteo says yes to every proposed fix; the rest of the team
-confirms or objects in the pull request. `docs/work_plan.md` already follows this plan (who does what, by which week);
-`docs/experiments.md` is updated once the team has confirmed. Why two tasks:
-`docs/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
+confirms or objects in the pull request. `docs/current/work_plan.md` already follows this plan (who does what, by which week);
+`docs/current/experiments.md` is updated once the team has confirmed. Why two tasks:
+`docs/reference/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
 thinned test sets).
 
 ## 1. Goal
@@ -13,7 +13,7 @@ reproducible from its config, and safe against the problems found in the first d
 
 ## 2. Problems and fix decisions
 
-Status: **decided** (in `docs/decisions.md`), **proposed** (Matteo: yes, 13 Nov; gets a D-number
+Status: **decided** (in `docs/log/decisions.md`), **proposed** (Matteo: yes, 13 Nov; gets a D-number
 once the team has confirmed and `luca_branchmann` is merged, to keep the numbering in one
 line), **to do** (no decision needed, only work).
 
@@ -132,7 +132,7 @@ we know. Thinning costs no training and is already built, so it stays in either 
 ## 7. Rules for the runs
 
 1. **Freeze first.** No run counts before the tag `protocol-v1`. A later change to the
-   protocol is a decision in `docs/decisions.md`, and the affected runs are repeated.
+   protocol is a decision in `docs/log/decisions.md`, and the affected runs are repeated.
 2. **Validation for choices, test for results.** Tuning and early stopping use the validation
    split only.
 3. **Every run is reproducible:** resolved config and git commit saved with it; run name from
@@ -140,13 +140,13 @@ we know. Thinning costs no training and is already built, so it stays in either 
 4. **One table of results.** A script collects every `metrics.json` into one file in
    `results/`. Figures and tables are made from that file only.
 5. **Primary measures are fixed** (M1–M4). Anything else in the report is marked as exploratory.
-6. **One owner per phase,** one line in `docs/ledger.md` when it starts and when it ends.
+6. **One owner per phase,** one line in `docs/log/work_ledger.md` when it starts and when it ends.
 
 ## 8. Steps
 
 1. Team: accept or change P1, P4, P5, P6, P8 and the order in section 5. Record them in
-   `docs/decisions.md`; update `docs/experiments.md` (add E5, the 25-variable contrast, the
-   order) and `docs/work_plan.md`.
+   `docs/log/decisions.md`; update `docs/current/experiments.md` (add E5, the 25-variable contrast, the
+   order) and `docs/current/work_plan.md`.
 2. Phase 0 code, each with a test on synthetic data: cut at ICU hour 59 in the data config;
    paired bootstrap in `eval/`; per-variable matched random removal in `perturb/`; hour-59 check
    in `scripts/check_data.py`; git commit in the saved config; results collector.

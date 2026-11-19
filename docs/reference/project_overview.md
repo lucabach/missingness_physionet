@@ -1,10 +1,10 @@
 # Project overview (plain language first)
 
-*Kind: static (change only after a scope decision). Map of all docs: [docs/README.md](README.md).*
+*Kind: static (change only after a scope decision). Map of all docs: [docs/README.md](../README.md).*
 
 Source: revised proposal after the meeting with Sarah on 6 Nov 2026
 (`deep_learning/final_proposal/revised/proposal.tex` in the project files; BibTeX in
-`docs/references.bib`).
+`docs/reference/references.bib`).
 
 ## The story
 
@@ -35,7 +35,7 @@ We use only real patients. We never invent data; we only *remove* existing measu
   or **state-dependent** (the extra measurements in hours where a patient is measured more
   than usual). Same number removed both ways.
 - **Sensitivity to measurement changes:** the *extra* loss under state-dependent over random
-  removal, compared with a values-only model. (Not "reliance", see `ta_feedback.md`.)
+  removal, compared with a values-only model. (Not "reliance", see `docs/log/ta_feedback.md`.)
 - **Thinning:** remove measurements from hospital-1 test patients until each variable is
   measured as often as in hospital 2. Same patients, same remaining values.
 - **Hospital 1 / hospital 2:** the two hospital systems of PhysioNet 2019 (challenge sets
@@ -68,7 +68,7 @@ Core: **GRU** with forward-filled inputs, **GRU-D** (Che et al. 2018), **ODE-RNN
 budget. Extensions only: Neural CDE (Kidger et al. 2020), Transformer with time and mask
 embeddings.
 
-## Experiments (details in `experiments.md`)
+## Experiments (details in `docs/current/experiments.md`)
 
 1. **Week-1 check:** measurement rates of hospital 1 vs 2; logistic regression and gradient
    boosting on pattern-only, values-only and time-only features; SOFA-variable check.

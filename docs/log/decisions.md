@@ -1,9 +1,14 @@
 # Decision log
 
-*Kind: log (add rows at the bottom; supersede, never renumber). Map of all docs: [docs/README.md](README.md).*
+*Kind: log (add rows at the bottom; supersede, never renumber). Map of all docs: [docs/README.md](../README.md).*
 
 Every choice that can change results gets an entry: number, date, who, what, why.
 Never renumber; supersede an entry with a new one that says which it replaces.
+
+Index: D1–D7 repo setup (6 Nov) · D8–D14 week 1, data and hospitals (Luca) · D15–D19 phase 0:
+cut at hour 59, removal, bootstrap (Luca, Matteo) · D20–D23 protocol `protocol-v1`: tuning,
+planted pattern, 25 variables, evaluation and measures (Matteo) · D24 planted pattern
+redesigned (Matteo) · D21 is superseded in part by D24.
 
 | # | Date | Who | Decision | Why |
 | --- | --- | --- | --- | --- |

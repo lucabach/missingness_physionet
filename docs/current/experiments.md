@@ -1,6 +1,6 @@
 # Experiment matrix
 
-*Kind: living (rewrite in place when a run type or timing changes). Map of all docs: [docs/README.md](README.md).*
+*Kind: living (rewrite in place when a run type or timing changes). Map of all docs: [docs/README.md](../README.md).*
 
 All runs: same preprocessing, splits (`splits/*_seed0.json`), tuning budget and evaluation.
 Seeds 0, 1, 2. Run names: `<dataset>_<model>_<inputs>_seed<k>` (set by `train.py`; the

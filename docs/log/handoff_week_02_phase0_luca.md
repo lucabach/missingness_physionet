@@ -1,6 +1,6 @@
 # Week 2 handoff (owners: Luca, Matteo; dates: 16–22 Nov)
 
-> *Static record (17 Nov, phase 0). Kept as written; see [docs/README.md](../README.md).*
+> *Kind: log (Luca's handoff of 17 Nov, kept as written). Map of all docs: [docs/README.md](../README.md).*
 > **Superseded on 18–19 Nov:** the baseline numbers of sections 3.3 and 3.4 changed after a
 > fix to early stopping in the baselines (it had used random hours, so one patient's hours
 > fell into both parts); current numbers in `docs/conclusions.md`. Q7–Q9 and the tag

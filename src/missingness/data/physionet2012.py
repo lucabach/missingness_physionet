@@ -6,7 +6,7 @@ files Outcomes-a.txt etc. with the column ``In-hospital_death``. Static descript
 Gender, Height, ICUType, Weight) appear at time 00:00; -1 means unknown.
 
 We put the 48 h on an hourly grid (hour 0..47), taking the mean of several measurements of
-the same variable within one hour (decision D3 in docs/decisions.md). Stays without a single
+the same variable within one hour (decision D3 in docs/log/decisions.md). Stays without a single
 time-series value (12 of 12,000) are dropped, as in Horn et al. 2020 and later benchmarks (D10).
 
 NOTE: written against the documented file format; the week-1 owner checks it on the real

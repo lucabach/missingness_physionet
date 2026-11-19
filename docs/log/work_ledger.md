@@ -1,6 +1,6 @@
 # Work ledger
 
-*Kind: log (append one line per piece of work). Map of all docs: [docs/README.md](README.md).*
+*Kind: log (append one line per piece of work). Map of all docs: [docs/README.md](../README.md).*
 
 One line per piece of work: who did it, on which branch, and what came out of it. It lets us
 see what the four of us (and our agents) are working on without reading every branch. It is an

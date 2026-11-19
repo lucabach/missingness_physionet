@@ -51,7 +51,7 @@ def matched_random_removal(
 def state_dependent_candidates(record: PatientRecord, rng: np.random.Generator) -> np.ndarray:
     """Flat indices of the 'extra' measurements, in random order within each hour.
 
-    First version (to be reviewed by the week-2 owner, see docs/decisions.md D5):
+    First version (to be reviewed by the week-2 owner, see docs/log/decisions.md D5):
     baseline = the patient's median number of measurements per hour; in each hour with more
     than that, the observations above the baseline are candidates.
     """

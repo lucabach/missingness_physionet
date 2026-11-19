@@ -1,6 +1,6 @@
 # Study design: why the same analysis runs on sepsis and on mortality
 
-*Kind: static (section 8 shows the evidence from before the cut). Map of all docs: [docs/README.md](README.md).*
+*Kind: static (section 8 shows the evidence from before the cut). Map of all docs: [docs/README.md](../README.md).*
 
 Reference for the report (sections on data, method and limitations). It gives the argument, the
 numbers behind it and a draft paragraph. Decided: two tasks (D2). Marked *proposed*: accepted by
@@ -137,7 +137,7 @@ With sepsis alone the first two rows cannot be told apart.
 
 > *Note 19 Nov:* these are the numbers from before the cut at hour 59 (D15). After the cut
 > and the fix to the baselines' early stopping (18 Nov) the sepsis gain from the pattern is
-> much smaller; current numbers in `docs/conclusions.md`.
+> much smaller; current numbers in `docs/current/conclusions.md`.
 
 Classical baselines on causal hand-made features (`scripts/run_baselines.py`, test AUROC,
 gradient boosting, sepsis trained and tested on hospital 1; before the cut at hour 59):

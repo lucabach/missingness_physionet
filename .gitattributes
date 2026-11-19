@@ -1,2 +1,4 @@
-# The work ledger is append-only: a merge keeps the lines of both branches (docs/ledger.md).
+# The work ledger is append-only: a merge keeps the lines of both branches.
+docs/log/work_ledger.md merge=union
+# Its path before 19 Nov, still used by older branches:
 docs/ledger.md merge=union

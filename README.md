@@ -14,8 +14,9 @@ hospital.
 Team: Parthiv Kangsabanik, Matteo Pelossi, Giulio Rebuffo, Luca Bachmann.
 Advisor TA: Sarah Martinson.
 
-New here? Read [docs/project_overview.md](docs/project_overview.md) (plain-language summary
-and glossary), then [CONTRIBUTING.md](CONTRIBUTING.md) (how we work together).
+New here? Read [docs/reference/project_overview.md](docs/reference/project_overview.md) (plain-language summary
+and glossary), then [CONTRIBUTING.md](CONTRIBUTING.md) (how we work together). Where things
+stand: [docs/current/conclusions.md](docs/current/conclusions.md); map of all docs: [docs/README.md](docs/README.md).
 Using an AI coding agent? It should read [CLAUDE.md](CLAUDE.md) first.
 
 ## Quick start
@@ -64,7 +65,7 @@ bash slurm/submit_ablations.sh sepsis
 
 Any config value can be overridden on the command line (`train.lr=3e-4`). Each run writes
 its resolved config, checkpoint, metrics and predictions to `outputs/<run_name>/`.
-The full experiment matrix is in [docs/experiments.md](docs/experiments.md).
+The full experiment matrix is in [docs/current/experiments.md](docs/current/experiments.md).
 
 ## Where everything is
 
@@ -83,13 +84,13 @@ The full experiment matrix is in [docs/experiments.md](docs/experiments.md).
 | `tests/` | pytest suite on synthetic data, runs in CI |
 | `notebooks/` | exploration only, outputs stripped |
 | `results/` | small final tables and figures for the report (raw runs stay in `outputs/`) |
-| `docs/` | overview, study design (why two tasks), work plan and plans, experiments, decision log, work ledger, TA feedback, weekly handoffs, cluster notes |
+| `docs/` | `reference/` (static: overview, study design), `current/` (living: conclusions, work plan, experiments, cluster), `log/` (append only: decisions, work ledger, TA feedback, weekly handoffs), `plans/`; map in `docs/README.md` |
 | `CLAUDE.md` / `AGENTS.md` | instructions for AI coding agents |
 
 ## Status
 
-Week-by-week plan and owners: [docs/work_plan.md](docs/work_plan.md). Latest handoff note:
-[docs/handoffs/](docs/handoffs/).
+Week-by-week plan and owners: [docs/current/work_plan.md](docs/current/work_plan.md). Latest handoff note:
+the newest `docs/log/handoff_week_NN.md`.
 
 | Component | State |
 | --- | --- |

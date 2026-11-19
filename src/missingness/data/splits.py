@@ -2,7 +2,7 @@
 
 Splits are written to ``splits/<dataset>_seed<k>.json`` and committed, so every teammate
 trains and evaluates on exactly the same patients. Never re-split silently: if a split must
-change, make a new seed file and log it in docs/decisions.md.
+change, make a new seed file and log it in docs/log/decisions.md.
 """
 
 from __future__ import annotations
