@@ -1,5 +1,7 @@
 # Plans
 
+*Kind: living (update when a plan starts or ends). Map of all docs: [docs/README.md](../README.md).*
+
 Index of the plans in this folder. The work ledger (who did what) is `docs/ledger.md`.
 
 ## Active

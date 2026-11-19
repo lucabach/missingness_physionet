@@ -1,5 +1,7 @@
 # Decision log
 
+*Kind: log (add rows at the bottom; supersede, never renumber). Map of all docs: [docs/README.md](README.md).*
+
 Every choice that can change results gets an entry: number, date, who, what, why.
 Never renumber; supersede an entry with a new one that says which it replaces.
 

@@ -1,5 +1,7 @@
 # Work plan: one week each
 
+*Kind: living (rewrite in place when owners or scope change). Map of all docs: [docs/README.md](README.md).*
+
 Updated 18 Nov 2026: every GRU run moves to week 2 (they run on a laptop CPU after the cut at
 hour 59); Giulio owns week 3 and does GRU-D and ODE-RNN with the same scripts. The method is
 the study plan (`docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`); this week's plan is

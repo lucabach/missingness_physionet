@@ -1,5 +1,7 @@
 # Project overview (plain language first)
 
+*Kind: static (change only after a scope decision). Map of all docs: [docs/README.md](README.md).*
+
 Source: revised proposal after the meeting with Sarah on 6 Nov 2026
 (`deep_learning/final_proposal/revised/proposal.tex` in the project files; BibTeX in
 `docs/references.bib`).
