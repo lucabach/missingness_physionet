@@ -23,6 +23,10 @@ By Sunday 22 Nov:
   up to 336 h.
 - The GRU part of the planted pattern (E5) runs in week 2, not week 4.
 - Giulio does GRU-D and ODE-RNN on both tasks (weeks 3 and 4 in `docs/work_plan.md`).
+- 19 Nov: the planted pattern of D21 saturates (GRU test AUROC 0.999 at every strength), so E5 is
+  redesigned (D24: q1 = 0.8, strength 1 to 1.2) and rerun for the GRU before Giulio uses it.
+- 19 Nov: two helpers for week 3: `tests/test_models.py` (interface, causality and input
+  variants for every model) and `--models` in the result scripts (other models' rows stay).
 
 ## Steps
 
@@ -49,6 +53,7 @@ Fixes from the review of PR #1 that matter for the runs, plus what comparable ru
 | B1 | Mortality GRU tuning: 8 on `all`, 8 on `values` (plan check) | `LOCAL=1 bash slurm/submit_tuning.sh mortality gru` |
 | B2 | Mortality GRU: 3 inputs × 3 seeds, then the standard evaluation | `LOCAL=1 MODELS=gru bash slurm/submit_ablations.sh mortality` |
 | B3 | E5 on mortality, GRU: 4 strengths × 3 seeds, rule off | see `docs/experiments.md` E5 |
+| B3b | E5 again with the revised design (D24, 19 Nov): the first one saturated at every strength | `MODELS=gru LOCAL=1 bash slurm/submit_planted.sh` |
 | B4 | Sepsis GRU tuning: 8 + 8 | as B1 |
 | B5 | Sepsis GRU: 9 runs; removal, thinning, hospital 2 | as B2 |
 | B6 | Sepsis GRU on the 25 comparable variables: `values`, `all` × 3 seeds | P5 |

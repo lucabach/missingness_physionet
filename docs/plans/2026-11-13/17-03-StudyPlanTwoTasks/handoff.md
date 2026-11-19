@@ -1,5 +1,10 @@
 # Handoff: start of phase 0 (written 13 Nov 2026, evening)
 
+> **Closed 19 Nov (Matteo).** Kept as a record, not to be followed any more. T1–T8 done by
+> Luca (17 Nov); T10, the tuning sweep, done for the GRU on both tasks (D20); T9 (GRU-D) is
+> part of Giulio's week 3. Where things stand now: `status.md` in this folder and
+> `docs/handoffs/week-02.md`.
+
 > **Update 17 Nov (Luca):** T1–T8 are done on `luca_branchmann` (PR #1), with tests, and
 > recorded as D15–D19; the T2 numbers below are reproduced exactly; the phase-1 gate passed.
 > The local branch `matteo/phase0` is no longer needed. Open: T9 (GRU-D, week 3) and the T10
