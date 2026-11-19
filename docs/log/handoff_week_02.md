@@ -8,32 +8,45 @@ Luca's handoff of 17 Nov, with every check of phase 0, is kept as
 its decisions in `docs/log/decisions.md`. Which document is static, living or a log:
 `docs/README.md`.
 
-## 1. In five lines
+## 1. In short
 
-1. The protocol is frozen (`protocol-v1`, D15–D23): data, splits, tuning, training,
+1. The protocol is frozen (`protocol-v1`, D15–D24): data, splits, tuning, training,
    evaluation and the four measures M1–M4 are the same for every model and every person.
 2. **Every GRU run of the study is done** (both tasks, on a laptop CPU): tuning, 9 runs per
    task, the planted pattern (2 × 24 runs), the 25-variable sepsis runs (6), removal, thinning and
    hospital 2. Numbers: `results/runs.csv`, `results/measures.csv`, read in `docs/current/conclusions.md`.
 3. **Your job:** implement GRU-D and ODE-RNN with the three input variants (plan section 4),
-   make `tests/test_models.py` pass for them, then run exactly the commands of section 4 below
+   make `tests/test_models.py` pass for them, then run exactly the commands of section 5 below
    with `M=grud` and `M=odernn`. Nothing else changes.
-4. The GRU runs fit on a laptop: about TBD h for everything. Measure one epoch of your
+4. The GRU runs fit on a laptop: 104 runs and their evaluation in roughly 7 hours of one
+   chain (we ran two at once, which made each 2–3x slower). Measure one epoch of your
    models before setting up the cluster; you may not need it.
 5. Open for you: Q5 (which implementations to port); record your choice as D25 and D26.
 
-## 2. Where the repository stands
+## 2. What the GRU found (details: `docs/current/conclusions.md`)
+
+- The pattern carries a lot but mostly repeats the values: the mask adds +0.009 AUROC for
+  mortality and +0.029 for sepsis (hospital 1, pre-onset).
+- No extra sensitivity to state-dependent removal on either task (M2 ≈ 0).
+- The planted pattern (D24) is found in proportion to its strength, and switching it off
+  costs the `all` model more than it gained; the `values` model never uses it.
+- Sepsis: with the pattern the GRU loses more at hospital 2 and under thinning (M4 +0.022 and
+  +0.012, intervals partly include 0).
+
+Your runs answer whether GRU-D and ODE-RNN, which use the gaps directly, behave the same.
+
+## 3. Where the repository stands
 
 | Item | State |
 | --- | --- |
 | PR #1 `luca_branchmann` | phase 0 (cut at hour 59, matched removal, paired bootstrap, planted-pattern code). Reviewed by Matteo, no blocker. **Merge first.** |
 | PR `matteo/protocol-v1` | on top of PR #1: the protocol (D20–D23), all GRU runs and their tables, this handoff, `docs/current/conclusions.md`. Merge second. |
-| Tag `protocol-v1` | the commit that froze the protocol. The tuned configurations were added after it by `scripts/pick_config.py`, as the protocol says |
+| Tag `protocol-v1` | the commit that froze the protocol, including the planted-pattern redesign (D24). The tuned GRU configurations were added after it by `scripts/pick_config.py`, as the protocol says |
 | Your branch | `giulio/grud-odernn` from `main` once both PRs are merged; if they are not merged by Monday, from `matteo/protocol-v1` |
 | Data | not in git: `bash scripts/download_data.sh`, then `python scripts/prepare_data.py physionet2019 physionet2012` (about 30 min) |
 | GRU predictions | in `outputs/` on Matteo's laptop (patient-level, never in git). Only needed if someone wants a paired test between models; ask Matteo |
 
-## 3. The protocol in one table
+## 4. The protocol in one table
 
 Do not change any of this without a new D-number agreed by the team; a change means the GRU
 runs have to be redone.
@@ -52,9 +65,9 @@ runs have to be redone.
 | Measures | M1–M4 as means over seeds, 95% interval from a paired patient bootstrap (D19, D23); sepsis: pre-onset hours are the headline | `scripts/measures.py` |
 | Traceability | every run saves its config with the git commit; a commit ending in `-dirty` is not a result | `outputs/<run>/config.yaml` |
 
-## 4. What you do in week 3, in order
+## 5. What you do in week 3, in order
 
-### 4.1 Set up (Monday)
+### 5.1 Set up (Monday)
 
 ```bash
 git fetch && git checkout main && git pull      # after PR #1 and protocol-v1 are merged
@@ -63,10 +76,10 @@ bash scripts/ledger.sh                          # what the others are doing
 pip install -e ".[dev]"                         # README, "Quick start"
 bash scripts/download_data.sh && python scripts/prepare_data.py physionet2019 physionet2012
 pytest                                          # 10 xfail = the two model stubs, expected
-python scripts/check_data.py physionet2019      # hour-59 table, must match docs/current/conclusions.md
+python scripts/check_data.py physionet2019      # hour-59 table: docs/current/conclusions.md, section 2
 ```
 
-### 4.2 Implement the two models
+### 5.2 Implement the two models
 
 `src/missingness/models/grud.py` and `odernn.py` are stubs with pointers to the original code
 (Q5: pick one implementation each, record it as D25 and D26). The interface is fixed:
@@ -90,7 +103,7 @@ Done when:
    `odernn`), `ruff check . && ruff format --check . && pytest` pass.
 4. One epoch on real data is timed; note it in `docs/current/experiments.md` (compute budget).
 
-### 4.3 Run them, same commands as the GRU
+### 5.3 Run them, same commands as the GRU
 
 Run from a committed state, otherwise each run records a `-dirty` commit. Week 2 did this from
 a second worktree, so the docs could keep changing in the main checkout:
@@ -105,7 +118,7 @@ export PYTHONUNBUFFERED=1 OMP_NUM_THREADS=6     # half the cores per chain if yo
 # after each new commit in the main checkout: git checkout --detach <commit>
 ```
 
-Then, for `M=grud` and then `M=odernn` (on the cluster drop `LOCAL=1`, see 4.4):
+Then, for `M=grud` and then `M=odernn` (on the cluster drop `LOCAL=1`, see 5.4):
 
 ```bash
 # mortality first (gate: `all` test AUROC in the published range, about 0.82-0.86)
@@ -129,12 +142,15 @@ python scripts/collect_results.py --models grud odernn      # -> results/runs.cs
 python scripts/measures.py --models grud odernn             # -> results/measures.csv, GRU rows kept
 ```
 
+References from the GRU (test AUROC of `all`): mortality 0.870; sepsis, hospital 1, pre-onset
+0.758. A model far below these points to a bug before it points to a result.
+
 64 runs per model, 128 in all. Every script skips runs and evaluations that already exist,
 so a chain can be restarted after a crash. Commit `results/runs.csv` and
 `results/measures.csv` (aggregate tables only), add your line to `docs/log/work_ledger.md`, write
 `docs/log/handoff_week_03.md` on Sunday.
 
-### 4.4 Laptop or cluster
+### 5.4 Laptop or cluster
 
 The GRU needed no cluster: a sepsis epoch took 11 s alone on 14 CPU cores (about 20 s with a
 second chain running), a mortality epoch about 4 s. Records are short (at most 60 hourly
@@ -143,7 +159,7 @@ may still fit on a laptop. If one sepsis epoch takes more than about a minute, u
 cluster: fix the `#SBATCH` lines in `slurm/train.sbatch` and fill in `docs/current/cluster.md`. Run
 `evaluate_runs.py` where the `outputs/` folder is, and bring back only the two CSV files.
 
-## 5. Pitfalls we already hit
+## 6. Pitfalls we already hit
 
 - **"Mean of empty slice" warning** when loading sepsis: EtCO2 is never measured at hospital 1,
   so its training mean is undefined and set to 0. Harmless.
@@ -164,8 +180,12 @@ cluster: fix the `#SBATCH` lines in `slurm/train.sbatch` and fill in `docs/curre
   `OMP_NUM_THREADS` so the two together do not exceed the cores.
 - **Without `--models`**, `collect_results.py` and `measures.py` rewrite the whole table from
   your `outputs/` folder and drop the GRU rows. Always pass `--models grud odernn`.
+- **`measures.py` takes about 20 minutes per model** on a laptop (the bootstrap runs over every
+  sepsis hour). Run it once, when all runs of a model are evaluated.
+- **The sepsis `pattern` variant runs to the 30-epoch cap** (the GRU's did, at 28–30 epochs).
+  That is the protocol; do not raise the cap for one model.
 
-## 6. Open items
+## 7. Open items
 
 | # | Item | Who |
 | --- | --- | --- |
@@ -174,15 +194,17 @@ cluster: fix the `#SBATCH` lines in `slurm/train.sbatch` and fill in `docs/curre
 | – | Owner of week 4 (measures for all three models, figures, results note) | team |
 | – | Cluster login and `docs/current/cluster.md`, only if the laptop is too slow | Giulio |
 
-## 7. How to rerun everything of week 2
+## 8. How to rerun everything of week 2
 
 ```bash
 python scripts/check_data.py physionet2019 physionet2012   # data facts + hour-59 table
 python scripts/run_baselines.py                             # baselines + SOFA check, ~30 min
 python scripts/build_thinned_sets.py --seeds 0 1 2          # thinned hospital-1 test sets
 python scripts/removal_shares.py                            # how much removal can remove
-# GRU: section 4.3 with M=gru, plus the plan's check of tuning on `values`:
+# GRU: section 5.3 with M=gru, plus the plan's check of tuning on `values`:
 INPUTS=values LOCAL=1 bash slurm/submit_tuning.sh <task> gru
 python scripts/pick_config.py <task> gru --inputs values
+# and the first, saturated planted design (D21), GRU only:
+Q1=1.0 STRENGTHS="1 1.5 2 4" MODELS=gru LOCAL=1 bash slurm/submit_planted.sh
 python scripts/evaluate_runs.py && python scripts/collect_results.py && python scripts/measures.py
 ```
