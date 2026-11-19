@@ -29,11 +29,16 @@ from missingness.utils import get_device, git_commit, set_seed
 
 
 def planted_tag(cfg: dict) -> str:
-    """'' for a normal run; '_planted<variable>-s<q1/q0>' for an E5 run (planted pattern)."""
+    """'' for a normal run; '_planted<variable>[-q<q1>]-s<q1/q0>' for an E5 run.
+
+    q1 appears only when it is not 1 (D21 used q1 = 1, D24 uses q1 = 0.8), so the two designs
+    never share a run folder.
+    """
     pl = cfg.get("planted")
     if not pl:
         return ""
-    return f"_planted{pl['variable']}-s{pl['q1'] / pl['q0']:.3g}"
+    q1 = "" if pl["q1"] == 1 else f"-q{pl['q1']:.3g}"
+    return f"_planted{pl['variable']}{q1}-s{pl['q1'] / pl['q0']:.3g}"
 
 
 def run_name(cfg: dict) -> str:

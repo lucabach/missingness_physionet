@@ -75,6 +75,8 @@ def test_run_names_keep_planted_and_plain_runs_apart():
     assert train.run_name(cfg) == "physionet2012_gru_all_seed1"
     cfg["planted"] = {"variable": "HR", "q1": 1.0, "q0": 1 / 1.5}
     assert train.run_name(cfg) == "physionet2012_gru_all_plantedHR-s1.5_seed1"
+    cfg["planted"] = {"variable": "HR", "q1": 0.8, "q0": 0.8 / 1.5}
+    assert train.run_name(cfg) == "physionet2012_gru_all_plantedHR-q0.8-s1.5_seed1"
     comparable = load_config(paths.CONFIG_DIR / "experiment" / "sepsis_comparable_gru.yaml")
     assert train.run_name(comparable) == "physionet2019_comparable_gru_all_seed0"
 

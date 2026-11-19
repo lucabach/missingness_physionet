@@ -44,6 +44,7 @@ def run_info(cfg: dict, run_dir: Path) -> dict:
     pl = cfg.get("planted") or {}
     info["planted_variable"] = pl.get("variable")
     info["planted_strength"] = pl["q1"] / pl["q0"] if pl else None
+    info["planted_q1"] = pl.get("q1")
     info["tuning"] = run_dir.name.startswith("tune_")
     metrics = run_dir / "metrics.json"
     m = json.loads(metrics.read_text()) if metrics.exists() else {}

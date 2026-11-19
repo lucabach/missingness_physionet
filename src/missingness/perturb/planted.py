@@ -3,13 +3,15 @@
 On real records, measurements of one variable are kept with probability ``q1`` for patients
 with the outcome and ``q0`` for the others. With q1 > q0 the mask of that variable now
 carries outcome information that we put there ourselves; with q1 = q0 it carries none. The
-strength of the rule is q1 / q0 (plan: 1, 1.5, 2, 4; 1 is the control).
+strength of the rule is q1 / q0. D24: q1 = 0.8 and strength {1, 1.05, 1.1, 1.2} (1 is the
+control). With q1 = 1 (D21) the patients with the outcome never lose a value, so an hour with
+other vital signs but no HR gives the label away: the GRU reached AUROC 0.999 at strength 1.5.
 
 "Rule off" is the test condition where the same share of that variable is deleted for every
 patient, whatever the outcome. A model that learned the planted habit should lose accuracy
 when the rule is switched off; the ``values`` model should not.
 
-Removal only, same patients (invariants 2 and 3). Code only, no runs before ``protocol-v1``.
+Removal only, same patients (invariants 2 and 3).
 """
 
 from __future__ import annotations

@@ -52,14 +52,18 @@ Contrast on the 25 variables both hospitals measure at a comparable rate (D22): 
 `values`, `all` × 3 seeds = 18 runs, `INPUTS="values all" bash slurm/submit_ablations.sh
 sepsis_comparable` (uses the sepsis tuned configuration).
 
-## E5 Planted pattern (plan P4, D21)
+## E5 Planted pattern (plan P4, D21, D24)
 
-On real mortality records, keep the HR measurements with probability q1 = 1.0 for patients
-who died and q0 = 1/strength for the others (`perturb/planted.py`), in train, validation and
-test. Strength {1, 1.5, 2, 4}; `all` and `values` × 4 strengths × 3 seeds = 24 runs per model
-(`slurm/submit_planted.sh`, `MODELS=gru LOCAL=1` for one model). Run names carry the rule
-(`physionet2012_gru_all_plantedHR-s2_seed0`). Rule off (`planted_off`) is evaluated by
-`scripts/evaluate_runs.py`.
+On real mortality records, keep the HR measurements with probability q1 = 0.8 for patients
+who died and q0 = 0.8/strength for the others (`perturb/planted.py`), in train, validation
+and test. Strength {1, 1.05, 1.1, 1.2}; `all` and `values` × 4 strengths × 3 seeds = 24 runs
+per model (`slurm/submit_planted.sh`, `MODELS=gru LOCAL=1` for one model). Run names carry
+the rule (`physionet2012_gru_all_plantedHR-q0.8-s1.1_seed0`). Rule off (`planted_off`) is
+evaluated by `scripts/evaluate_runs.py`.
+
+The first design (D21: q1 = 1.0, strength {1, 1.5, 2, 4}) saturates: the GRU finds the rule
+perfectly at every strength (test AUROC 0.999), so it has no dose-response. Its 24 GRU runs
+stay as the saturated end (`Q1=1.0 STRENGTHS="1 1.5 2 4"`); the other models skip it (D24).
 
 ## Standard evaluation and measures (D23)
 

@@ -24,10 +24,11 @@ def test_standard_evaluation_and_measures(tmp_path, monkeypatch):
         for seed in (0, 1):
             train.train(load_config(smoke, base + [f"inputs={inputs}", f"seed={seed}"]))
     for inputs in ("all", "values"):
-        for q0 in (1.0, 0.5):
-            cfg = load_config(smoke, base + [f"inputs={inputs}"])
-            cfg["planted"] = {"variable": 0, "q1": 1.0, "q0": q0}
-            train.train(cfg)
+        for q1 in (1.0, 0.8):  # two designs of the rule (D21, D24), strengths 1 and 2
+            for q0 in (q1, q1 / 2):
+                cfg = load_config(smoke, base + [f"inputs={inputs}"])
+                cfg["planted"] = {"variable": 0, "q1": q1, "q0": q0}
+                train.train(cfg)
 
     jobs_of = _script("evaluate_runs").standard_jobs
     for run in sorted(tmp_path.iterdir()):
@@ -48,3 +49,5 @@ def test_standard_evaluation_and_measures(tmp_path, monkeypatch):
     m1 = [r for r in table if r["measure"] == "M1_delta_mask" and r["subset"] == "all"]
     assert all(r["n_seeds"] == 2 and r["lo"] <= r["value"] <= r["hi"] for r in m1)
     assert all("S_all_rows" in r for r in m1)
+    m3 = [r for r in table if r["measure"] == "M3_gain" and r["subset"] == "all"]
+    assert sorted({r["planted_q1"] for r in m3}) == [0.8, 1.0]  # designs kept apart

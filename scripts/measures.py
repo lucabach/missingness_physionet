@@ -17,6 +17,7 @@ Measures (AUROC differences; a positive value means what the name says):
   extra loss under state-dependent removal that the pattern inputs add.
 - M3 gain: rule on at strength s minus rule on at strength 1, per input variant (E5).
 - M3 loss_off: rule on minus rule off at strength s, per input variant, and all minus values.
+  Each design of the rule (column ``planted_q1``: 1.0 for D21, 0.8 for D24) is kept apart.
 - M4 thinning: (recorded − thinned) for all minus the same for values, hospital-1 test set.
 - M4 transfer: (hospital 1 − hospital 2) for all minus the same for values; the two test sets
   are independent samples, so their bootstrap draws are resampled separately.
@@ -63,6 +64,7 @@ def runs_index(outputs: Path, models: list[str] | None) -> pd.DataFrame:
                 "inputs": cfg["inputs"],
                 "seed": cfg["seed"],
                 "strength": round(pl["q1"] / pl["q0"], 3) if pl else None,
+                "q1": pl.get("q1"),
             }
         )
     return pd.DataFrame(rows)
@@ -214,9 +216,9 @@ def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dic
                     | {"lo": round(float(lo), 4), "hi": round(float(hi), 4)}
                 )
 
-    planted = idx[idx["strength"].notna()]  # M3
-    for (data_tag, model, task), g in planted.groupby(["data_tag", "model", "task"]):
-        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model}
+    planted = idx[idx["strength"].notna()]  # M3, one design (q1) at a time: D21 q1 = 1, D24 0.8
+    for (data_tag, model, task, q1), g in planted.groupby(["data_tag", "model", "task", "q1"]):
+        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model, "planted_q1": q1}
         paths = defaultdict(dict)
         for _, r in g.iterrows():
             paths[(r["inputs"], r["strength"])][r["seed"]] = r["path"]
