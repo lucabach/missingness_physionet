@@ -1,6 +1,7 @@
 """Collect every run's metrics into one table (plan, rule 4: figures come from this file only).
 
     python scripts/collect_results.py                    # -> results/runs.csv
+    python scripts/collect_results.py --models grud odernn   # only these; other rows stay
     python scripts/collect_results.py --out results/runs_mortality.csv --outputs outputs/
 
 One row per run, test set, subset and metric; tuning runs (``tune_*``) have one row with
@@ -19,6 +20,7 @@ import pandas as pd
 import yaml
 
 from missingness.paths import OUTPUT_DIR, REPO_ROOT
+from missingness.results import write_table
 
 RUN_KEYS = {
     "dataset": ("data", "name"),
@@ -74,11 +76,13 @@ def metric_rows(metrics: dict) -> list[dict]:
     return rows
 
 
-def collect(outputs: Path) -> pd.DataFrame:
+def collect(outputs: Path, models: list[str] | None = None) -> pd.DataFrame:
     rows = []
     for cfg_path in sorted(outputs.glob("*/config.yaml")):
         run_dir = cfg_path.parent
         cfg = yaml.safe_load(cfg_path.read_text())
+        if models and cfg["model"]["name"] not in models:
+            continue
         run = run_info(cfg, run_dir)
         sources = []
         if (run_dir / "metrics.json").exists():
@@ -101,10 +105,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--outputs", type=Path, default=OUTPUT_DIR)
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "results" / "runs.csv")
+    ap.add_argument(
+        "--models", nargs="*", help="only these models; the other models' rows in --out stay"
+    )
     args = ap.parse_args()
-    df = collect(args.outputs)
-    args.out.parent.mkdir(exist_ok=True)
-    df.to_csv(args.out, index=False)
+    df = collect(args.outputs, args.models)
+    write_table(df, args.out, args.models)
     print(f"{df['run'].nunique() if len(df) else 0} runs, {len(df)} rows -> {args.out}")
 
 

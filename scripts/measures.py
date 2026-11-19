@@ -1,6 +1,7 @@
 """The primary measures M1–M4 (study plan, section 4) from the saved predictions of all runs.
 
     python scripts/measures.py                       # -> results/measures.csv
+    python scripts/measures.py --models grud odernn  # only these; other models' rows stay
     python scripts/measures.py --models gru --metrics auroc auprc
 
 Every measure is a difference of AUROCs, averaged over the seeds, with a 95% interval from a
@@ -38,6 +39,7 @@ from missingness.eval import bootstrap_contrast, information_share
 from missingness.eval.metrics import METRICS
 from missingness.experiment import eval_subsets
 from missingness.paths import OUTPUT_DIR, REPO_ROOT
+from missingness.results import write_table
 
 TASK_OF = {"hourly": "sepsis", "stay": "mortality"}
 
@@ -228,7 +230,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--outputs", type=Path, default=OUTPUT_DIR)
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "results" / "measures.csv")
-    ap.add_argument("--models", nargs="*", help="only these models (default: all)")
+    ap.add_argument(
+        "--models", nargs="*", help="only these models; the other models' rows in --out stay"
+    )
     ap.add_argument("--metrics", nargs="+", default=["auroc"])
     ap.add_argument("--n-boot", type=int, default=1000)
     args = ap.parse_args()
@@ -236,8 +240,7 @@ def main() -> None:
     if idx.empty:
         raise SystemExit(f"no finished runs in {args.outputs}")
     table = pd.DataFrame(measure_rows(idx, args.metrics, args.n_boot))
-    args.out.parent.mkdir(exist_ok=True)
-    table.to_csv(args.out, index=False)
+    write_table(table, args.out, args.models)
     print(f"{len(table)} rows -> {args.out}")
 
 
