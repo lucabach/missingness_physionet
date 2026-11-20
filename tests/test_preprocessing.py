@@ -31,3 +31,17 @@ def test_normalizer_ignores_missing(records):
     assert np.all(np.isfinite(norm.mean)) and np.all(norm.std > 0)
     again = Normalizer.from_dict(norm.to_dict())
     np.testing.assert_allclose(again.mean, norm.mean)
+
+
+def test_records_to_frame_roundtrip(records):
+    from missingness.data.records import records_from_frame, records_to_frame
+
+    vars_ = [f"v{i}" for i in range(records[0].values.shape[1])]
+    stat = [f"s{i}" for i in range(len(records[0].static))]
+    back = records_from_frame(records_to_frame(records, vars_, stat), vars_, stat, False)
+    by_id = {r.patient_id: r for r in back}
+    for r in records:
+        b = by_id[r.patient_id]
+        np.testing.assert_array_equal(b.values, r.values)
+        np.testing.assert_array_equal(b.labels, r.labels)
+        np.testing.assert_allclose(b.static, r.static)

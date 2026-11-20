@@ -39,3 +39,35 @@ def test_physionet2012_txt(tmp_path):
     assert rec.values[5, 1] == 80 and rec.values[47, 0] == 90
     assert np.isnan(rec.static[2])  # Height -1 -> unknown
     assert rec.labels.tolist() == [0]
+
+
+def test_physionet2012_drops_stays_without_measurements(tmp_path):
+    (tmp_path / "set-a").mkdir()
+    (tmp_path / "set-a" / "140501.txt").write_text(
+        "Time,Parameter,Value\n00:00,RecordID,140501\n00:00,Age,70\n00:00,Gender,1\n"
+        "00:00,Height,-1\n00:00,ICUType,2\n00:00,Weight,-1\n"
+    )
+    (tmp_path / "set-a" / "132539.txt").write_text(
+        "Time,Parameter,Value\n00:00,RecordID,132539\n00:00,Age,54\n00:00,Gender,0\n"
+        "00:00,Height,-1\n00:00,ICUType,4\n00:00,Weight,-1\n00:07,HR,73\n"
+    )
+    (tmp_path / "Outcomes-a.txt").write_text(
+        "RecordID,SAPS-I,SOFA,Length_of_stay,Survival,In-hospital_death\n"
+        "140501,6,1,5,-1,0\n132539,6,1,5,-1,0\n"
+    )
+    df = physionet2012.load_raw(tmp_path, ["HR"], ["Age", "Gender", "Height", "ICUType"])
+    assert df["patient_id"].unique().tolist() == ["132539"]
+
+
+def test_cut_at_hour_drops_late_rows_and_late_records():
+    import pandas as pd
+
+    from missingness.data.records import cut_at_hour
+
+    df = pd.DataFrame(
+        {"patient_id": ["a"] * 3 + ["b"] * 2, "hour": [1, 59, 60, 61, 62], "label": [0] * 5}
+    )
+    out = cut_at_hour(df, 59)
+    assert out["hour"].max() == 59
+    assert out["patient_id"].unique().tolist() == ["a"]  # b starts after 59: dropped whole
+    assert cut_at_hour(df, None).equals(df)

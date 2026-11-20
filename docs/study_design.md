@@ -26,7 +26,7 @@ Early sepsis prediction on PhysioNet 2019 (Reyna et al. 2020) is the natural fir
 
 ## 3. Two caveats of the sepsis data
 
-In this dataset the pattern can predict the label for two reasons that are **not** the
+In this dataset the pattern can predict the label for two further reasons besides the
 mechanism of section 1. A good pattern-only score cannot tell the three apart.
 
 | | Label caveat | Cohort caveat |
@@ -35,20 +35,55 @@ mechanism of section 1. A good pattern-only score cannot tell the three apart.
 | Why | Sepsis-3 onset (Singer et al. 2016) is the earlier of (a) the time cultures or IV antibiotics were ordered and (b) the time the SOFA score rose by 2 points. Four of the six SOFA parts need a lab result. | Almost no record of a patient without sepsis continues past ICU hour 59. |
 | Effect on the pattern | The hour the label turns on is, by definition, an hour around which tests were ordered. "Tests ordered" predicts the label even if tests were ordered at random. | (i) The hour of the stay alone predicts the label. (ii) "Not septic" means "left the ICU early", so heavy monitoring looks more specific to sepsis than it is. |
 | Evidence | Around onset the lab rate rises to 1.7–1.8 times that of comparable patients without sepsis (hospital 2: in the 6 h before onset; hospital 1: after onset). | Records past ICU hour 59: hospital 1, 644 septic and 8 not; hospital 2, 387 and 224. A model that only knows the hour of the stay reaches AUROC 0.71 (hospital 1, gradient boosting, `results/baselines.csv`). |
-| Can we fix it? | No. The order times are not released, so its size cannot be measured. | Part (i): yes, cut every record at ICU hour 59 (*proposed*). Part (ii): no. |
+| Can we fix it? | No. The order times are not released, so its size cannot be measured. | Part (i): yes, cut every record at ICU hour 59 (decided, D15). Part (ii): no. |
 
 **Same illness, different label time** (label caveat): two identical patients get worse at
 10:00. For one, cultures and labs are ordered at 11:00, for the other at 17:00. The first is
 labelled septic from 11:00, the second from 17:00. The label follows the clinician's action.
 
+### Are the two caveats part of what we study?
+
+One is, one is not. This distinction is the reason for the second task.
+
+| | What makes the pattern predictive | Tells us about the patient | Would hold for death | Part of our topic |
+| --- | --- | --- | --- | --- |
+| Mechanism of section 1 | sicker patients are measured more | yes | yes | yes |
+| Label caveat | the label is built from orders and lab results | partly | no | yes, but it supports a different claim |
+| Cohort caveat | long-stay patients without sepsis are missing | no | no | no, an artefact of the dataset |
+
+- **The label caveat is a second mechanism, not an error.** It is also about measurement
+  patterns, and a clinician's order does reflect concern about the patient. But "models use how
+  clinicians measure sick patients" is a statement about clinical data in general, and "models
+  use how the sepsis label is made" is a statement about one label definition. Sepsis alone
+  cannot say which of the two we found.
+- **With both tasks the label caveat becomes a result:** how much the pattern matters when the
+  outcome is built from measurements (sepsis) and when it is not (mortality).
+- **The cohort caveat is unrelated to clinical behaviour.** It comes from which patients were
+  put in the dataset and would not exist in a real ICU. We cut what we can and state the rest
+  as a limitation.
+
+**The label caveat is about timing, not about who gets the labs.** SOFA is not a test that is
+ordered. It is a score computed afterwards from routine values, and patients who never become
+septic have these labs almost as often (hospital 1, first 24 h, share of hours with a
+measurement; patients not yet septic in that window):
+
+| Lab | No sepsis later | Sepsis later |
+| --- | --- | --- |
+| Creatinine | 7.1 % | 8.4 % |
+| Platelets | 7.0 % | 8.2 % |
+| Bilirubin | 1.4 % | 2.1 % |
+
+What ties the pattern to the label is that the label can only turn on at an order or a lab
+result.
+
 ## 4. What we do inside the sepsis data
 
 | Step | Removes | Status |
 | --- | --- | --- |
-| Cut every record at ICU hour 59 (training, validation, test, both hospitals) | cohort caveat, part (i) | *proposed* |
-| Report a model that sees only the hour of the stay | shows what remains of part (i) | done before the cut, repeat after |
+| Cut every record at ICU hour 59 (training, validation, test, both hospitals) | cohort caveat, part (i) | decided (D15, 17 Nov) |
+| Report a model that sees only the hour of the stay | shows what remains of part (i) | done: 0.712 before the cut, 0.582 after (gradient boosting, hospital 1) |
 | Report pre-onset hours next to all hours | the heavy testing after onset | done (invariant 6) |
-| Check the SOFA variables' pattern against other variables | bounds one part of the label caveat | done: dropping it costs 0.011 AUROC at hospital 1 (`results/sofa_check.csv`) |
+| Check the SOFA variables' pattern against other variables | bounds one part of the label caveat | done: dropping it costs 0.017 AUROC at hospital 1 after the cut (0.011 before) (`results/sofa_check.csv`) |
 
 What remains after these steps: the label caveat as a whole, and part (ii) of the cohort
 caveat. Neither can be removed with PhysioNet 2019 alone.
@@ -152,4 +187,4 @@ every number against the table below.
 | --- | --- |
 | Patients, outcome rates, positive hours | `scripts/check_data.py` (branch `luca_branchmann`) |
 | Baseline AUROCs, SOFA check | `results/baselines.csv`, `results/sofa_check.csv` (branch `luca_branchmann`) |
-| Records past ICU hour 59; 2,019 patients and 1.3 % after the cut; lab rate around onset | Matteo's check on the raw files, 13 Nov. Not yet reproducible in this repo: step 1 of the plan adds it to `scripts/check_data.py`. |
+| Records past ICU hour 59; 2,019 patients and 1.3 % after the cut; lab rate around onset; lab rates in the first 24 h by later sepsis | Matteo's check on the raw files, 13 Nov. Not yet reproducible in this repo: step 1 of the plan adds it to `scripts/check_data.py`. |

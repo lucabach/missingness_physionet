@@ -6,13 +6,23 @@ should be called in every experiment script.
 """
 
 from missingness.perturb.invariants import check_only_removed
-from missingness.perturb.removal import paired_removal, random_removal, state_dependent_removal
+from missingness.perturb.planted import planted_keep_rate, planted_off, planted_removal
+from missingness.perturb.removal import (
+    matched_random_removal,
+    paired_removal,
+    random_removal,
+    state_dependent_removal,
+)
 from missingness.perturb.thinning import measurement_rates, thin_to_rates
 
 __all__ = [
     "check_only_removed",
+    "matched_random_removal",
     "measurement_rates",
     "paired_removal",
+    "planted_keep_rate",
+    "planted_off",
+    "planted_removal",
     "random_removal",
     "state_dependent_removal",
     "thin_to_rates",

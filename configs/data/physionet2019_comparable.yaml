@@ -1,0 +1,40 @@
+# PhysioNet 2019 restricted to the 25 variables both hospitals measure at a comparable rate
+# (rate ratio hospital 1 / hospital 2 between 1/3 and 3, after the cut at hour 59). Plan P5:
+# the transfer contrast (b) and its 18 runs. Left out: EtCO2, BaseExcess, HCO3, FiO2, pH,
+# PaCO2, Chloride, TroponinI, PTT. Rates: results/hospital_rates.csv.
+name: physionet2019
+tag: physionet2019_comparable  # run names, so these runs never overwrite the 34-variable ones
+task: hourly            # one label per ICU hour (SepsisLabel, positive from 6 h before onset)
+train_source: hospital1 # measures more on 23 of 34 variables, so thinning can match those (D11)
+test_sources: [hospital1, hospital2]
+max_hour: 59            # cut every record at ICU hour 59: non-septic records end there (D15)
+static: [Age, Gender, Unit1, Unit2, HospAdmTime]
+variables:
+  - HR
+  - O2Sat
+  - Temp
+  - SBP
+  - MAP
+  - DBP
+  - Resp
+  - SaO2
+  - AST
+  - BUN
+  - Alkalinephos
+  - Calcium
+  - Creatinine
+  - Bilirubin_direct
+  - Glucose
+  - Lactate
+  - Magnesium
+  - Phosphate
+  - Potassium
+  - Bilirubin_total
+  - Hct
+  - Hgb
+  - WBC
+  - Fibrinogen
+  - Platelets
+# Variables that enter the SOFA score (Singer et al. 2016), for the label-construction check
+# (week 2). PaO2, GCS, urine output and vasopressors are not in PhysioNet 2019 (D13).
+sofa_variables: [MAP, Platelets, Bilirubin_total, Creatinine, FiO2]

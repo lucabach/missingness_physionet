@@ -73,6 +73,23 @@ def records_from_frame(
     return records
 
 
+def records_to_frame(
+    records: list[PatientRecord], variables: list[str], static: list[str]
+) -> pd.DataFrame:
+    """Inverse of ``records_from_frame`` (hourly labels; a stay label is repeated per row)."""
+    frames = []
+    for r in records:
+        df = pd.DataFrame(r.values, columns=variables)
+        df.insert(0, "hour", r.hours)
+        df.insert(0, "source", r.source)
+        df.insert(0, "patient_id", r.patient_id)
+        for i, col in enumerate(static):
+            df.insert(3 + i, col, r.static[i])
+        df["label"] = r.labels if len(r.labels) == len(r.hours) else r.labels[-1]
+        frames.append(df)
+    return pd.concat(frames, ignore_index=True)
+
+
 def save_processed(df: pd.DataFrame, dataset: str, root: Path = PROCESSED_DIR) -> Path:
     path = root / dataset / "timeseries.parquet"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -80,8 +97,23 @@ def save_processed(df: pd.DataFrame, dataset: str, root: Path = PROCESSED_DIR) -
     return path
 
 
+def cut_at_hour(df: pd.DataFrame, max_hour: int | None) -> pd.DataFrame:
+    """Drop rows after ``max_hour`` (PhysioNet 2019 cohort artefact, D15).
+
+    Almost no record of a non-septic patient goes past ICU hour 59, so without the cut the
+    hour of the stay predicts the label. A record that starts after ``max_hour`` disappears
+    as a whole. The processed table on disk stays complete; the cut is applied when loading.
+    """
+    if max_hour is None:
+        return df
+    return df[df["hour"] <= max_hour]
+
+
 def load_processed(dataset_cfg: dict, root: Path = PROCESSED_DIR) -> list[PatientRecord]:
-    """Load all records of a dataset described by a ``configs/data/*.yaml`` config."""
+    """Load all records of a dataset described by a ``configs/data/*.yaml`` config.
+
+    Applies ``max_hour`` from the config if set (sepsis: 59, D15).
+    """
     path = root / dataset_cfg["name"] / "timeseries.parquet"
     if not path.exists():
         raise FileNotFoundError(
@@ -89,6 +121,11 @@ def load_processed(dataset_cfg: dict, root: Path = PROCESSED_DIR) -> list[Patien
             f"`python scripts/prepare_data.py {dataset_cfg['name']}` first (see data/README.md)."
         )
     df = pd.read_parquet(path)
+    n_before = df["patient_id"].nunique()
+    df = cut_at_hour(df, dataset_cfg.get("max_hour"))
+    n_dropped = n_before - df["patient_id"].nunique()
+    if n_dropped:
+        print(f"{dataset_cfg['name']}: {n_dropped} records start after max_hour, dropped")
     return records_from_frame(
         df,
         variables=dataset_cfg["variables"],
