@@ -31,11 +31,13 @@ Status: active
   ready for Giulio's handoff.
 - 20 Nov: the handoff shows the four GRU findings with one figure each (section 2, linked at
   the top); `scripts/plot_findings.py` draws them, with `--model grud|odernn` for week 3.
-  Section 5 renamed "Suggestions for week 3". Branch `matteo/handoff-figures`, not pushed yet.
+  Section 5 renamed "Suggestions for week 3". PR #6 (`matteo/handoff-figures`) merged into
+  `main` by Matteo, without a second review, like PR #5.
 
 ## Next
 
 - Luca sends the merged email to Sarah; her answers go to `docs/log/ta_feedback.md`.
+- Matteo tells Giulio to read `docs/log/handoff_week_02.md` on `main` before the call.
 - Sunday 22 Nov: handoff call with Giulio; then this plan is done.
 
 ## Blockers
