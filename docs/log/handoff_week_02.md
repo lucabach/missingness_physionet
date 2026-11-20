@@ -39,10 +39,10 @@ Your runs answer whether GRU-D and ODE-RNN, which use the gaps directly, behave 
 
 | Item | State |
 | --- | --- |
-| PR #1 `luca_branchmann` | phase 0 (cut at hour 59, matched removal, paired bootstrap, planted-pattern code). Reviewed by Matteo, no blocker. **Merge first.** |
-| PR `matteo/protocol-v1` | on top of PR #1: the protocol (D20–D23), all GRU runs and their tables, this handoff, `docs/current/conclusions.md`. Merge second. |
+| PR #1 `luca_branchmann` | phase 0 (cut at hour 59, matched removal, paired bootstrap, planted-pattern code). Reviewed by Matteo, no blocker. **Merged 20 Nov.** |
+| PR #5 `matteo/protocol-v1` | on top of PR #1: the protocol (D20–D23), all GRU runs and their tables, this handoff, `docs/current/conclusions.md`. **Merged 20 Nov.** |
 | Tag `protocol-v1` | the commit that froze the protocol, including the planted-pattern redesign (D24). The tuned GRU configurations were added after it by `scripts/pick_config.py`, as the protocol says |
-| Your branch | `giulio/grud-odernn` from `main` once both PRs are merged; if they are not merged by Monday, from `matteo/protocol-v1` |
+| Your branch | `giulio/grud-odernn` from `main` (both PRs are in it) |
 | Data | not in git: `bash scripts/download_data.sh`, then `python scripts/prepare_data.py physionet2019 physionet2012` (about 30 min) |
 | GRU predictions | in `outputs/` on Matteo's laptop (patient-level, never in git). Only needed if someone wants a paired test between models; ask Matteo |
 
@@ -70,7 +70,7 @@ runs have to be redone.
 ### 5.1 Set up (Monday)
 
 ```bash
-git fetch && git checkout main && git pull      # after PR #1 and protocol-v1 are merged
+git fetch && git checkout main && git pull      # main has PR #1 and PR #5
 git checkout -b giulio/grud-odernn
 bash scripts/ledger.sh                          # what the others are doing
 pip install -e ".[dev]"                         # README, "Quick start"

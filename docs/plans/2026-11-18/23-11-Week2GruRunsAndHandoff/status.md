@@ -27,10 +27,11 @@ Status: active
   opened against `main`. The questions for Sarah were merged with Luca's draft email (same
   numbering as `conclusions.md`, section 7; his baseline numbers updated to after the
   early-stopping fix).
+- 20 Nov: PR #5 merged into `main` by Matteo, without a second review, so that `main` is
+  ready for Giulio's handoff.
 
 ## Next
 
-- A teammate reviews and merges PR #5.
 - Luca sends the merged email to Sarah; her answers go to `docs/log/ta_feedback.md`.
 - Sunday 22 Nov: handoff call with Giulio; then this plan is done.
 
