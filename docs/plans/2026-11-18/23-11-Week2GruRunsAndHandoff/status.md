@@ -22,16 +22,20 @@ Status: active
   handoff `docs/log/handoff_week_02.md`.
 - Docs reorganized into `reference/`, `current/`, `log/` with a map in `docs/README.md`
   (Matteo's request, 19 Nov).
+- 20 Nov: PR #1 merged into `main` (merge commit `21113c2`); GitHub shows PR #4 as merged too,
+  its commits were part of PR #1. `matteo/protocol-v1` and the tag `protocol-v1` pushed; PR #5
+  opened against `main`. The questions for Sarah were merged with Luca's draft email (same
+  numbering as `conclusions.md`, section 7; his baseline numbers updated to after the
+  early-stopping fix).
 
 ## Next
 
-- Matteo: review and merge PR #1; push `matteo/protocol-v1` and the tag
-  (`git push -u origin matteo/protocol-v1 && git push origin protocol-v1`); open its PR.
-- Matteo: send the questions of `docs/current/conclusions.md`, section 7, to Sarah.
+- A teammate reviews and merges PR #5.
+- Luca sends the merged email to Sarah; her answers go to `docs/log/ta_feedback.md`.
 - Sunday 22 Nov: handoff call with Giulio; then this plan is done.
 
 ## Blockers
 
 - None.
 
-Last update: 2026-11-19
+Last update: 2026-11-20
