@@ -31,7 +31,7 @@ Status: active
   ready for Giulio's handoff.
 - 20 Nov: the handoff shows the four GRU findings with one figure each (section 2, linked at
   the top); `scripts/plot_findings.py` draws them, with `--model grud|odernn` for week 3.
-  Branch `matteo/handoff-figures`, not pushed yet.
+  Section 5 renamed "Suggestions for week 3". Branch `matteo/handoff-figures`, not pushed yet.
 
 ## Next
 

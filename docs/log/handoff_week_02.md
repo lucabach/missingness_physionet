@@ -118,7 +118,7 @@ runs have to be redone.
 | Measures | M1–M4 as means over seeds, 95% interval from a paired patient bootstrap (D19, D23); sepsis: pre-onset hours are the headline | `scripts/measures.py` |
 | Traceability | every run saves its config with the git commit; a commit ending in `-dirty` is not a result | `outputs/<run>/config.yaml` |
 
-## 5. What you do in week 3, in order
+## 5. Suggestions for week 3
 
 ### 5.1 Set up (Monday)
 
