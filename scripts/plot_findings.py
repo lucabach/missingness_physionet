@@ -256,7 +256,7 @@ def fig_planted(r: pd.DataFrame, name: str, out: str) -> None:
         ax.set_title(title)
     axes[0].set_ylabel("test AUROC, mortality (mean of 3 seeds)")
     axes[-1].legend(loc="upper left", fontsize=8.5)
-    suptitle(fig, f"3. Planted pattern (M3), {name}: heart rate measured more for deaths")
+    suptitle(fig, f"3. Planted heart-rate pattern (M3), {name}")
     fig.tight_layout()
     fig.savefig(out, dpi=150)
     plt.close(fig)

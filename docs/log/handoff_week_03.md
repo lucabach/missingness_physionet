@@ -6,12 +6,12 @@ The table gives mean test AUROC across seeds 0, 1 and 2 for the full models. Sep
 
 | Model | Mortality | Sepsis |
 | --- | ---: | ---: |
-| grud | 0.872 | 0.755 |
-| odernn | 0.862 | 0.757 |
+| GRU-D | 0.872 | 0.755 |
+| ODE-RNN | 0.862 | 0.757 |
 
 Reproduce the sweeps and evaluations with [the Week 2 handoff, section 5.3](handoff_week_02.md#53-run-them-same-commands-as-the-gru). The frozen configurations are in `configs/experiment/`. The aggregate scores, paired bootstrap intervals and seed-level contrasts for Week 4 are in [runs.csv](../../results/runs.csv) and [measures.csv](../../results/measures.csv).
 
-The figures use the same plotting script as the Week 2 handoff. The GRU-D values variant uses a plain GRU.
+The figures use the same plotting script as the Week 2 handoff.
 
 | Measure | GRU-D | ODE-RNN |
 | --- | --- | --- |
