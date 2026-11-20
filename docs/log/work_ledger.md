@@ -46,3 +46,4 @@ work. `area` is one of `data`, `perturb`, `models`, `baselines`, `eval`, `runs`,
 | 2026-11-19 | matteo+agent | matteo/protocol-v1 | runs | done | All 104 GRU runs on CPU: pattern mostly redundant, no removal sensitivity (M2 ≈ 0), planted pattern redesigned and found, more transfer loss with pattern | `docs/current/conclusions.md` |
 | 2026-11-20 | matteo+agent | matteo/handoff-figures | docs | done | Week-2 handoff shows the four GRU findings with one figure each; `scripts/plot_findings.py --model <m>` draws the same for GRU-D and ODE-RNN | `docs/log/handoff_week_02.md` |
 | 2026-11-20 | giulio+agent | giulio/week3 | models | start | Implemented GRU-D and ODE-RNN for the three input variants in the shared training pipeline | D25–D26 |
+| 2026-11-20 | giulio+agent | giulio/week3 | runs | done | Both deep models completed eight configurations per task and the full 96-run post-tuning matrix | D25–D26 |
