@@ -1,7 +1,14 @@
 # Decision log
 
+*Kind: log (add rows at the bottom; supersede, never renumber). Map of all docs: [docs/README.md](../README.md).*
+
 Every choice that can change results gets an entry: number, date, who, what, why.
 Never renumber; supersede an entry with a new one that says which it replaces.
+
+Index: D1–D7 repo setup (6 Nov) · D8–D14 week 1, data and hospitals (Luca) · D15–D19 phase 0:
+cut at hour 59, removal, bootstrap (Luca, Matteo) · D20–D23 protocol `protocol-v1`: tuning,
+planted pattern, 25 variables, evaluation and measures (Matteo) · D24 planted pattern
+redesigned (Matteo) · D21 is superseded in part by D24.
 
 | # | Date | Who | Decision | Why |
 | --- | --- | --- | --- | --- |
@@ -24,16 +31,15 @@ Never renumber; supersede an entry with a new one that says which it replaces.
 | D17 | 2026-11-17 | Luca (Q4) | Removal fractions p ∈ {0.05, 0.10, 0.15}; p = 0.10 is the primary level (measure M2); the achieved fraction is always reported next to the result. `evaluate.py` default p = 0.10 | After the cut, p = 0.10 is reached by 99% of hospital-1, 88% of hospital-2 and 98% of mortality test patients (achieved 0.100 / 0.097 / 0.100). p = 0.15 is reached in full at hospital 1 (0.149) and mortality (0.146) but only partly at hospital 2 (0.133, 56% of patients); p ≥ 0.2 is out of reach |
 | D18 | 2026-11-17 | Luca, Matteo (plan P8) | Sepsis pre-onset numbers are reported with and without the patients who are positive from their first hour (`pre_onset_excl_positive_at_start` in `score_predictions`); they stay in training and in the all-hours numbers | Their onset time is unknown and they have no earlier hours; reporting only, no result changes |
 | D19 | 2026-11-17 | Luca, Matteo (plan P3) | A difference between two models (Δmask, M2, M4) is reported with a paired patient bootstrap: the same resampled patients for both models (`eval.bootstrap_diff`, `eval.bootstrap_contrast`) | Few outcome patients per test set (about 175, 120, 256 after the cut), so two separate intervals overlap even when one model is clearly better on the same patients |
+| D20 | 2026-11-18 | Matteo (Luca's proposal, Q7) | Tuning: hidden size {64, 128} × learning rate {1e-3, 3e-4} × weight decay {0, 1e-5}, seed 0, `all` inputs, chosen by validation AUROC; tuning runs do not score the test sets. The choice is written as a `tuned` block into `configs/experiment/<task>_<model>.yaml` (`scripts/pick_config.py --write`) and used for every input variant and seed; the 25-variable sepsis runs use the sepsis choice. Plan check: the GRU sweep is repeated on `values`; if its best configuration beats the `all` choice by more than 0.01 validation AUROC, we tune per variant | Same budget for every model; the test split stays unused until tuning is frozen (plan, rule 2) |
+| D21 | 2026-11-18 | Matteo (Luca's proposal, Q8, plan P4) | Planted pattern E5 runs: mortality, variable HR, keep probability q1 = 1.0 for patients who died and q0 = 1/strength for the others, strength {1, 1.5, 2, 4}, in train, validation and test; `all` **and** `values` models, seeds 0–2 (24 runs per model, `slurm/submit_planted.sh`). Rule off = the same overall keep rate for every patient, seed 0 | The only experiment whose true answer we know (M3). HR is measured almost every hour, so the rule has enough values to act on. The `values` runs are what the plan compares against ("the values model under the same rule") |
+| D22 | 2026-11-18 | Matteo (Luca's proposal, Q9, plan P5) | Transfer contrast on the 25 variables both hospitals measure at a comparable rate (rate ratio between 1/3 and 3; the same 25 before and after the cut, checked 18 Nov): `values` and `all`, 3 seeds per model (`configs/experiment/sepsis_comparable_<model>.yaml`) | Thinning to hospital 2's rates mostly deletes variables that hospital 2 hardly records; models trained on the 25 show the transfer loss without them |
+| D23 | 2026-11-18 | Matteo | Standard evaluation and measures, the same for every model (`scripts/evaluate_runs.py`, `scripts/measures.py`). Removal with seed 0 for every model, so all models see the same perturbed test sets; thinning seeds 0–2. A measure is the mean over seeds of an AUROC difference; its 95% interval comes from a paired patient bootstrap in which every draw scores all models and seeds on the same patients; the value per seed is reported next to it. M4 transfer: the two hospitals are bootstrapped independently | Results of GRU, GRU-D and ODE-RNN must be comparable whoever runs them; with about 120–260 outcome patients per test set, patient noise is larger than seed noise |
+| D24 | 2026-11-19 | Matteo (first E5 result) | E5 revised: keep HR with q1 = 0.8 for patients who died and q0 = 0.8/strength for the others, strength {1, 1.05, 1.1, 1.2}; `all` and `values`, seeds 0–2, rule off seed 0 (24 runs per model, `slurm/submit_planted.sh`; run names `..._plantedHR-q0.8-s1.1_...`). Supersedes q1 and the strengths of D21. The 24 GRU runs of D21 are kept as the saturated end and are not run for GRU-D and ODE-RNN | With q1 = 1 a patient who died never loses an HR value, so an hour with other vital signs but no HR gives the label away: the GRU `all` model reached test AUROC 0.999 at strength 1.5, 2 and 4 alike (no dose-response). That single statistic, computed on the mortality test set without any training, gives AUROC 0.94 already at strength 1.05 with q1 = 1, but 0.66 / 0.78 / 0.92 at strength 1.05 / 1.1 / 1.2 with q1 = 0.8 (0.51 without a rule) |
 
 ## Open questions
 
 - **Q1–Q3, Q6:** resolved by D10–D13 (13 Nov).
 - **Q4:** resolved by D16 and D17 (17 Nov). D5 stays the state-dependent rule.
 - **Q5 (week 3):** Which open-source GRU-D and ODE-RNN implementations to port.
-- **Q7 (before `protocol-v1`):** Tuning grid, 8 configurations per model and task. Proposal:
-  hidden size {64, 128} × learning rate {1e-3, 3e-4} × weight decay {0, 1e-5}
-  (`slurm/submit_tuning.sh`).
-- **Q8 (before `protocol-v1`):** Planted pattern E5 (plan P4): run it? Proposal: yes, on
-  mortality, variable HR, q1 = 1.0 and q0 = 1/strength for strength {1, 1.5, 2, 4}.
-- **Q9 (before `protocol-v1`):** Transfer contrast on the 25 comparable variables (plan P5,
-  18 sepsis runs, `configs/experiment/sepsis_comparable_*.yaml`). Proposal: yes.
+- **Q7–Q9:** resolved by D20–D22 (18 Nov).

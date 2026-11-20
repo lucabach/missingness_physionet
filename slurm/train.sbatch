@@ -3,7 +3,7 @@
 #   sbatch slurm/train.sbatch configs/experiment/sepsis_gru.yaml inputs=pattern seed=1
 #
 # TODO (week 2/3 owner): check partition/account names and GPU syntax for the ETH student
-# cluster in its documentation and fix the #SBATCH lines below; record them in docs/cluster.md.
+# cluster in its documentation and fix the #SBATCH lines below; record them in docs/current/cluster.md.
 #SBATCH --job-name=missingness
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=4

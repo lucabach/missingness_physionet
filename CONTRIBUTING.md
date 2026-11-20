@@ -10,14 +10,14 @@ run on every commit.
 
 ## Weekly relay
 
-We split the core work into one-week packages (plan and owners: `docs/work_plan.md`).
+We split the core work into one-week packages (plan and owners: `docs/current/work_plan.md`).
 
 - **One owner per week, Monday to Sunday.** The owner does the main work and decides small
-  questions alone. Bigger ones go in `docs/decisions.md`.
+  questions alone. Bigger ones go in `docs/log/decisions.md`.
 - **Definition of done** is the deliverable list for that week. Anything not done by Sunday
   is written down as an open item, not passed on silently.
-- **Sunday handoff.** The owner merges their work, writes `docs/handoffs/week-NN.md` from
-  `docs/handoffs/TEMPLATE.md`, and holds a 20-minute call with the next owner.
+- **Sunday handoff.** The owner merges their work, writes `docs/log/handoff_week_NN.md` from
+  `docs/reference/handoff_template.md`, and holds a 20-minute call with the next owner.
 - **Off-week jobs:** review the owner's PRs within a day, read 1–2 benchmark papers, finish
   the PhysioNet credentialing (CITI training) so eICU stays possible as a fallback.
 
@@ -28,7 +28,7 @@ We split the core work into one-week packages (plan and owners: `docs/work_plan.
 2. `git switch -c <name>/<topic>` (e.g. `giulio/thinning`)
 3. Commit small, meaningful steps. Message: imperative, one line, e.g. `Add rate-matched thinning`.
 4. `ruff check . && ruff format --check . && pytest` locally.
-5. Add your line to `docs/ledger.md` (rules at the top of that file).
+5. Add your line to `docs/log/work_ledger.md` (rules at the top of that file).
 6. Push and open a PR into `main`; fill in the template, including how to run it.
 7. One teammate reviews; CI must be green; the author merges (squash merge).
 
@@ -40,10 +40,10 @@ branch.
 - **A model:** class in `src/missingness/models/<name>.py` following the interface in
   CLAUDE.md, register it in `MODELS`, add `configs/model/<name>.yaml` and
   `configs/experiment/<task>_<name>.yaml`, extend the smoke test.
-- **An experiment:** a config in `configs/experiment/`, a row in `docs/experiments.md`.
+- **An experiment:** a config in `configs/experiment/`, a row in `docs/current/experiments.md`.
 - **A perturbation:** a function in `src/missingness/perturb/` returning new records; a test
   that it passes `check_only_removed`.
-- **A decision:** a numbered entry in `docs/decisions.md` (date, owner, what, why).
+- **A decision:** a numbered entry in `docs/log/decisions.md` (date, owner, what, why).
 
 ## Results
 

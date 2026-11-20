@@ -28,10 +28,24 @@ from missingness.paths import OUTPUT_DIR
 from missingness.utils import get_device, git_commit, set_seed
 
 
+def planted_tag(cfg: dict) -> str:
+    """'' for a normal run; '_planted<variable>[-q<q1>]-s<q1/q0>' for an E5 run.
+
+    q1 appears only when it is not 1 (D21 used q1 = 1, D24 uses q1 = 0.8), so the two designs
+    never share a run folder.
+    """
+    pl = cfg.get("planted")
+    if not pl:
+        return ""
+    q1 = "" if pl["q1"] == 1 else f"-q{pl['q1']:.3g}"
+    return f"_planted{pl['variable']}{q1}-s{pl['q1'] / pl['q0']:.3g}"
+
+
 def run_name(cfg: dict) -> str:
+    """outputs/<run_name>: data tag, model, inputs, planted rule (E5 only), seed."""
     return cfg.get("run_name") or (
         f"{cfg['data'].get('tag', cfg['data']['name'])}_{cfg['model']['name']}"
-        f"_{cfg['inputs']}_seed{cfg['seed']}"
+        f"_{cfg['inputs']}{planted_tag(cfg)}_seed{cfg['seed']}"
     )
 
 
@@ -82,11 +96,12 @@ def train(cfg: dict) -> dict:
             if patience >= tcfg["patience"]:
                 break
 
-    model.load_state_dict(torch.load(out_dir / "model.pt", map_location=device))
-    metrics = {"val_auroc": best}
+    model.load_state_dict(torch.load(out_dir / "model.pt", map_location=device, weights_only=True))
+    metrics = {"val_auroc": best, "epochs": epoch + 1}
     (out_dir / "predictions").mkdir(exist_ok=True)
+    # Tuning runs set eval.test=false: the test split stays unused until tuning is frozen.
     for name, records in sets.items():
-        if not name.startswith("test"):
+        if not name.startswith("test") or not cfg["eval"].get("test", True):
             continue
         pred = predict(model, records, norm, task, device)
         pred.to_parquet(out_dir / "predictions" / f"{name}.parquet", index=False)
@@ -100,8 +115,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("experiment", help="path to configs/experiment/*.yaml")
     parser.add_argument("overrides", nargs="*", help="key.sub=value overrides")
+    parser.add_argument("--skip-done", action="store_true", help="skip if metrics.json exists")
     args = parser.parse_args()
-    train(load_config(args.experiment, args.overrides))
+    cfg = load_config(args.experiment, args.overrides)
+    if args.skip_done and (OUTPUT_DIR / run_name(cfg) / "metrics.json").exists():
+        print(f"skip {run_name(cfg)} (done)")
+        return
+    train(cfg)
 
 
 if __name__ == "__main__":

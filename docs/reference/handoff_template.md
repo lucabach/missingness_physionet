@@ -14,7 +14,7 @@
 ## Results and numbers worth knowing
 - ...
 
-## Decisions made (added to docs/decisions.md)
+## Decisions made (added to docs/log/decisions.md)
 - D..
 
 ## Watch out / next steps for the next owner

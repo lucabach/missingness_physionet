@@ -26,7 +26,7 @@ from sklearn.preprocessing import StandardScaler
 from missingness.baselines.features import FEATURE_SETS, build_features, feature_names
 from missingness.config import load_config
 from missingness.data.preprocessing import Normalizer
-from missingness.eval.metrics import auroc, pre_onset_mask
+from missingness.eval.metrics import auroc, bootstrap_diff, pre_onset_mask
 from missingness.experiment import load_data, score_predictions
 from missingness.paths import CONFIG_DIR, REPO_ROOT
 
@@ -38,6 +38,21 @@ def make_model(name: str, seed: int = 0):
         return make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000, C=1.0))
     return HistGradientBoostingClassifier(
         max_iter=300, learning_rate=0.1, early_stopping=True, random_state=seed
+    )
+
+
+def fit(name: str, feats: dict, cols: np.ndarray | None = None):
+    """Fit on the training split. Gradient boosting early-stops on the validation split
+    (other patients), not on random hours of the training patients."""
+    pick = (lambda X: X) if cols is None else (lambda X: X[:, cols])  # noqa: E731
+    model = make_model(name)
+    if name == "logreg":
+        return model.fit(pick(feats["train"]["X"]), feats["train"]["y"])
+    return model.fit(
+        pick(feats["train"]["X"]),
+        feats["train"]["y"],
+        X_val=pick(feats["val"]["X"]),
+        y_val=feats["val"]["y"],
     )
 
 
@@ -82,12 +97,11 @@ def run_task(task: str, n_boot: int) -> tuple[pd.DataFrame, dict]:
         feats = {
             name: build_features(recs, kind, step, norm.mean, norm.static_mean)
             for name, recs in sets.items()
-            if name == "train" or name.startswith("test")
         }
         cache[kind] = feats
         for model_name in ("logreg", "hgb"):
             t0 = time.time()
-            model = make_model(model_name).fit(feats["train"]["X"], feats["train"]["y"])
+            model = fit(model_name, feats)
             for name, data in feats.items():
                 if not name.startswith("test"):
                     continue
@@ -117,22 +131,27 @@ def sofa_check(cfg: dict, feats: dict, n_random: int = 5, seed: int = 0) -> pd.D
         pick = sorted(rng.choice(others, size=len(sofa), replace=False).tolist())
         variants.append((f"random{k}", ",".join(pick), drop_pattern(pick)))
 
-    rows = []
+    rows, base = [], {}
     for name, dropped, cols in variants:
-        model = make_model("hgb").fit(feats["train"]["X"][:, cols], feats["train"]["y"])
+        model = fit("hgb", feats, cols)
         for test in [k for k in feats if k.startswith("test")]:
             pred = predict_frame(model, feats[test], cols)
+            base.setdefault(test, pred)  # the first variant drops nothing
             pre = pre_onset_mask(pred["patient_id"], pred["hour"], pred["label"])
-            rows.append(
-                {
-                    "variant": name,
-                    "pattern_dropped_for": dropped,
-                    "test_set": test,
-                    "auroc_all": auroc(pred["label"], pred["score"]),
-                    "auroc_pre_onset": auroc(pred["label"][pre], pred["score"][pre]),
-                }
-            )
-            print(f"sofa-check {name:8s} {test:15s} AUROC {rows[-1]['auroc_all']:.3f}")
+            row = {"variant": name, "pattern_dropped_for": dropped, "test_set": test}
+            for subset, keep in (("all", np.ones(len(pred), dtype=bool)), ("pre_onset", pre)):
+                # loss = AUROC(nothing dropped) - AUROC(this variant), same patients (D19)
+                d = bootstrap_diff(
+                    pred["label"].to_numpy()[keep],
+                    base[test]["score"].to_numpy()[keep],
+                    pred["score"].to_numpy()[keep],
+                    pred["patient_id"].to_numpy()[keep],
+                )
+                row[f"auroc_{subset}"] = auroc(pred["label"][keep], pred["score"][keep])
+                row |= {f"loss_{subset}": d["value"], f"loss_{subset}_lo": d["lo"]}
+                row[f"loss_{subset}_hi"] = d["hi"]
+            rows.append(row)
+            print(f"sofa-check {name:8s} {test:15s} AUROC {row['auroc_all']:.3f}")
     return pd.DataFrame(rows)
 
 

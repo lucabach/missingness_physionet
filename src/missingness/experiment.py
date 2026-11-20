@@ -14,7 +14,8 @@ from missingness.data.records import PatientRecord, load_processed
 from missingness.data.splits import load_splits, make_splits, select
 from missingness.data.synthetic import make_synthetic
 from missingness.eval.metrics import bootstrap_ci, pre_onset_mask
-from missingness.perturb.planted import planted_removal
+from missingness.perturb.invariants import check_only_removed
+from missingness.perturb.planted import planted_index, planted_removal
 
 
 def load_data(cfg: dict, apply_planted: bool = True) -> dict[str, list[PatientRecord]]:
@@ -47,16 +48,26 @@ def load_data(cfg: dict, apply_planted: bool = True) -> dict[str, list[PatientRe
             sets[f"test_{s}"] = select(records, splits["test"], s)
     else:
         sets["test"] = select(records, splits["test"])
+    return with_planted(cfg, sets) if apply_planted else sets
+
+
+def with_planted(cfg: dict, sets: dict[str, list[PatientRecord]]) -> dict[str, list[PatientRecord]]:
+    """Apply the config's ``planted`` rule (E5) to every set; unchanged if there is none.
+
+    ``sets`` must be the full output of ``load_data`` (train, val, tests, in that order): the
+    seed of each set depends on its position, so evaluation rebuilds the same test sets.
+    Each planted set is checked with ``check_only_removed`` (invariant 2).
+    """
     planted = cfg.get("planted")
-    if planted and apply_planted:
-        v = planted["variable"]  # a name from data.variables, or a column index
-        d = v if isinstance(v, int) else data_cfg["variables"].index(v)
-        seed = planted.get("seed", 0)
-        sets = {
-            name: planted_removal(recs, d, planted["q1"], planted["q0"], seed=seed + k)
-            for k, (name, recs) in enumerate(sets.items())
-        }
-    return sets
+    if not planted:
+        return sets
+    d = planted_index(planted, cfg["data"].get("variables", []))
+    seed = planted.get("seed", 0)
+    out = {}
+    for k, (name, recs) in enumerate(sets.items()):
+        out[name] = planted_removal(recs, d, planted["q1"], planted["q0"], seed=seed + k)
+        check_only_removed(recs, out[name])
+    return out
 
 
 def make_loader(
@@ -103,6 +114,21 @@ def predict(
     return pd.concat(rows, ignore_index=True)
 
 
+def eval_subsets(pred: pd.DataFrame, task: str) -> dict[str, np.ndarray]:
+    """Row masks of the reported subsets: all rows; for sepsis also the pre-onset hours, with
+    and without the patients who are positive from their first hour (P8, D18)."""
+    subsets = {"all": np.ones(len(pred), dtype=bool)}
+    if task == "hourly":
+        subsets["pre_onset"] = pre_onset_mask(
+            pred["patient_id"].to_numpy(), pred["hour"].to_numpy(), pred["label"].to_numpy()
+        )
+        # Patients positive from their first hour have no earlier hours and an unknown onset.
+        first = pred.sort_values("hour").groupby("patient_id")["label"].first()
+        early = pred["patient_id"].isin(first.index[first > 0]).to_numpy()
+        subsets["pre_onset_excl_positive_at_start"] = subsets["pre_onset"] & ~early
+    return subsets
+
+
 def score_predictions(pred: pd.DataFrame, task: str, n_boot: int = 1000) -> dict:
     """AUROC/AUPRC with patient-bootstrap CIs.
 
@@ -110,17 +136,7 @@ def score_predictions(pred: pd.DataFrame, task: str, n_boot: int = 1000) -> dict
     their first hour (P8, D18).
     """
     out = {}
-    subsets = {"all": np.ones(len(pred), dtype=bool)}
-    if task == "hourly":
-        subsets["pre_onset"] = pre_onset_mask(
-            pred["patient_id"].to_numpy(), pred["hour"].to_numpy(), pred["label"].to_numpy()
-        )
-        # P8: patients positive from their first hour have no earlier hours and an unknown
-        # onset; report pre-onset numbers without them too.
-        first = pred.sort_values("hour").groupby("patient_id")["label"].first()
-        early = pred["patient_id"].isin(first.index[first > 0]).to_numpy()
-        subsets["pre_onset_excl_positive_at_start"] = subsets["pre_onset"] & ~early
-    for name, keep in subsets.items():
+    for name, keep in eval_subsets(pred, task).items():
         p = pred[keep]
         for metric in ("auroc", "auprc"):
             out[f"{name}/{metric}"] = bootstrap_ci(

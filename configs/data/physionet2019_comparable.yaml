@@ -1,7 +1,8 @@
 # PhysioNet 2019 restricted to the 25 variables both hospitals measure at a comparable rate
-# (rate ratio hospital 1 / hospital 2 between 1/3 and 3, after the cut at hour 59). Plan P5:
-# the transfer contrast (b) and its 18 runs. Left out: EtCO2, BaseExcess, HCO3, FiO2, pH,
-# PaCO2, Chloride, TroponinI, PTT. Rates: results/hospital_rates.csv.
+# (rate ratio hospital 1 / hospital 2 between 1/3 and 3). D22: the transfer contrast (b) and
+# its 18 runs. Left out: EtCO2, BaseExcess, HCO3, FiO2, pH, PaCO2, Chloride, TroponinI, PTT.
+# Rates: results/hospital_rates.csv (computed before the cut at hour 59; after the cut the
+# same 25 variables qualify, checked 18 Nov).
 name: physionet2019
 tag: physionet2019_comparable  # run names, so these runs never overwrite the 34-variable ones
 task: hourly            # one label per ICU hour (SepsisLabel, positive from 6 h before onset)

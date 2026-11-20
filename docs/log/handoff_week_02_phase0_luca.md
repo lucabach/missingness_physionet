@@ -1,5 +1,11 @@
 # Week 2 handoff (owners: Luca, Matteo; dates: 16–22 Nov)
 
+> *Kind: log (Luca's handoff of 17 Nov, kept as written). Map of all docs: [docs/README.md](../README.md).*
+> **Superseded on 18–19 Nov:** the baseline numbers of sections 3.3 and 3.4 changed after a
+> fix to early stopping in the baselines (it had used random hours, so one patient's hours
+> fell into both parts); current numbers in `docs/conclusions.md`. Q7–Q9 and the tag
+> `protocol-v1` are done (D20–D23). The handoff to week 3 is `week-02.md`.
+
 Written 17 Nov by Luca. This is the document to read before taking over the repository in
 week 3. It says what was inspected, what we found, what is decided, what is still open, the
 trade-offs we see, and the questions for Sarah. All work is on branch `luca_branchmann`

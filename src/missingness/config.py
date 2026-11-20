@@ -2,7 +2,10 @@
 
 An experiment file names a data config and a model config; they are merged in this order
 (later wins): configs/data/<data>.yaml -> configs/model/<model>.yaml -> experiment file ->
-command-line overrides like ``train.lr=1e-3``.
+the experiment's ``tuned`` block -> command-line overrides like ``train.lr=1e-3``.
+
+The ``tuned`` block holds the configuration chosen by the tuning sweep for this task and
+model (written by ``scripts/pick_config.py``), as dotted keys: ``model.hidden_size: 128``.
 """
 
 from __future__ import annotations
@@ -44,8 +47,8 @@ def load_config(experiment: str | Path, overrides: list[str] | None = None) -> d
             cfg = _deep_update(cfg, {kind: part})
             exp = {k: v for k, v in exp.items() if k != kind}
     cfg = _deep_update(cfg, exp)
-    for item in overrides or []:
-        keys, value = _parse_override(item)
+    tuned = [(k.split("."), v) for k, v in (cfg.get("tuned") or {}).items()]
+    for keys, value in tuned + [_parse_override(item) for item in overrides or []]:
         node = cfg
         for k in keys[:-1]:
             node = node.setdefault(k, {})

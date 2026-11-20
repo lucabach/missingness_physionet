@@ -66,3 +66,37 @@ def test_score_predictions_reports_pre_onset_without_positive_at_start():
     pred = pd.DataFrame(rows, columns=["patient_id", "hour", "label", "score"])
     out = score_predictions(pred, "hourly", n_boot=20)
     assert {"all/auroc", "pre_onset/auroc", "pre_onset_excl_positive_at_start/auroc"} <= set(out)
+
+
+def _copy_rows_bootstrap(y, scores, weights, pids, metric, n_boot, seed=0):
+    """The first implementation: copy the rows of every drawn patient (reference)."""
+    from missingness.eval.metrics import METRICS
+
+    fn = METRICS[metric]
+    _, inverse = np.unique(pids, return_inverse=True)
+    rows_of = [np.flatnonzero(inverse == k) for k in range(inverse.max() + 1)]
+    rng = np.random.default_rng(seed)
+    stats = []
+    for _ in range(n_boot):
+        pick = rng.integers(0, len(rows_of), size=len(rows_of))
+        idx = np.concatenate([rows_of[k] for k in pick])
+        if y[idx].min() == y[idx].max():
+            continue
+        stats.append(sum(w * fn(y[idx], s[idx]) for w, s in zip(weights, scores, strict=True)))
+    return np.quantile(stats, [0.025, 0.975]), len(stats)
+
+
+def test_weighted_bootstrap_equals_copying_rows():
+    from missingness.eval import bootstrap_contrast
+
+    rng = np.random.default_rng(3)
+    pids = np.repeat(np.arange(40), rng.integers(1, 6, 40))
+    y = (rng.random(len(pids)) < 0.2).astype(float)
+    a = np.round(y + rng.normal(0, 1, len(y)), 1)  # rounded: many ties
+    b = np.round(a + rng.normal(0, 0.5, len(y)), 1)
+    for metric in ("auroc", "auprc"):
+        for scores, weights in (([a], [1.0]), ([a, b], [1.0, -1.0])):
+            res = bootstrap_contrast(y, scores, weights, pids, metric, n_boot=200)
+            (lo, hi), n = _copy_rows_bootstrap(y, scores, weights, pids, metric, 200)
+            assert res["n_boot"] == n
+            assert abs(res["lo"] - lo) < 1e-9 and abs(res["hi"] - hi) < 1e-9

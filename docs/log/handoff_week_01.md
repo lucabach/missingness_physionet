@@ -1,5 +1,7 @@
 # Week 1 handoff (owner: Luca + colleague, dates: 9–15 Nov) — draft after day 1 (13 Nov)
 
+*Kind: static (record of week 1). Map of all docs: [docs/README.md](../README.md).*
+
 Luca's part, branch `luca_branchmann`. Merge with the colleague's branch before Sunday.
 
 ## Done

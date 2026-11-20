@@ -1,9 +1,9 @@
 # Study plan: same analysis on sepsis and mortality
 
 Proposal by Matteo, 13 Nov 2026. Matteo says yes to every proposed fix; the rest of the team
-confirms or objects in the pull request. `docs/work_plan.md` already follows this plan (who does what, by which week);
-`docs/experiments.md` is updated once the team has confirmed. Why two tasks:
-`docs/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
+confirms or objects in the pull request. `docs/current/work_plan.md` already follows this plan (who does what, by which week);
+`docs/current/experiments.md` is updated once the team has confirmed. Why two tasks:
+`docs/reference/study_design.md`. Builds on the state of branch `luca_branchmann` (D8–D14, baselines,
 thinned test sets).
 
 ## 1. Goal
@@ -13,20 +13,20 @@ reproducible from its config, and safe against the problems found in the first d
 
 ## 2. Problems and fix decisions
 
-Status: **decided** (in `docs/decisions.md`), **proposed** (Matteo: yes, 13 Nov; gets a D-number
+Status: **decided** (in `docs/log/decisions.md`), **proposed** (Matteo: yes, 13 Nov; gets a D-number
 once the team has confirmed and `luca_branchmann` is merged, to keep the numbering in one
 line), **to do** (no decision needed, only work).
 
 | # | Problem | Fix | Status |
 | --- | --- | --- | --- |
-| P1 | Records of patients without sepsis end at ICU hour 59, so the hour of the stay predicts the label (AUROC 0.71 from the hour alone). | Cut all PhysioNet 2019 records at ICU hour 59, in training, validation and test. Repeat the baselines after the cut. | proposed |
+| P1 | Records of patients without sepsis end at ICU hour 59, so the hour of the stay predicts the label (AUROC 0.71 from the hour alone). | Cut all PhysioNet 2019 records at ICU hour 59, in training, validation and test. Repeat the baselines after the cut. | decided (D15) |
 | P2 | The sepsis label is built from clinicians' orders and lab results. | Same analysis on mortality (D2, D12). State what remains as a limitation. | decided |
-| P3 | Few patients with the outcome in a test set (about 180, 120 and 256), so one AUROC is uncertain by about ±0.04. | Report differences between two models on the same resampled patients (paired bootstrap). Seeds 0–2; add seeds 3–4 only where a primary measure is unclear. | to do |
-| P4 | Nothing shows that our sensitivity measure detects a model that depends on the pattern. | New experiment E5: a planted pattern on real records (section 6). | proposed |
-| P5 | Thinning to hospital 2's rates mostly deletes variables that hospital 2 hardly records. | Keep D11 and D14 (all 34 variables). Add a contrast on the 25 variables both hospitals record at a comparable rate (section 6). | proposed |
-| P6 | State-dependent removal deletes mostly labs, random removal mostly vitals, so they differ in more than the choice of hours. | Random removal takes the same number of values **per variable** as state-dependent removal; only the hours differ. p in {0.05, 0.10, 0.15} (Q4). | proposed |
+| P3 | Few patients with the outcome in a test set (about 180, 120 and 256), so one AUROC is uncertain by about ±0.04. | Report differences between two models on the same resampled patients (paired bootstrap). Seeds 0–2; add seeds 3–4 only where a primary measure is unclear. | decided (D19) |
+| P4 | Nothing shows that our sensitivity measure detects a model that depends on the pattern. | New experiment E5: a planted pattern on real records (section 6). | decided (D21) |
+| P5 | Thinning to hospital 2's rates mostly deletes variables that hospital 2 hardly records. | Keep D11 and D14 (all 34 variables). Add a contrast on the 25 variables both hospitals record at a comparable rate (section 6). | decided (D22) |
+| P6 | State-dependent removal deletes mostly labs, random removal mostly vitals, so they differ in more than the choice of hours. | Random removal takes the same number of values **per variable** as state-dependent removal; only the hours differ. p in {0.05, 0.10, 0.15} (Q4). | decided (D16, D17) |
 | P7 | "Values only" and "pattern only" are not defined for GRU-D and ODE-RNN. | Write the definitions (table in section 4) before the two models are implemented. | to do |
-| P8 | 426 septic patients are positive from their first hour: no earlier hours, onset time unknown. | Keep them in training and in the all-hours numbers. Report pre-onset numbers with and without them. | proposed |
+| P8 | 426 septic patients are positive from their first hour: no earlier hours, onset time unknown. | Keep them in training and in the all-hours numbers. Report pre-onset numbers with and without them. | decided (D18) |
 | P9 | Three motivating numbers come from 2026 preprints nobody has checked. | Read Nie et al., Gupta et al. and Tranchellini et al. before the report. | to do |
 | P10 | The title and some wording promise more than the design can show. | Soften the title; say "change in measurement density" for thinning; say that irregular sampling times are out of scope. | to do |
 
@@ -45,6 +45,10 @@ change of policy; the hourly grid.
 | Hour-59 finding, caveats, this plan, work ledger | Matteo |
 
 Not started: GRU-D, ODE-RNN, tuning, all training runs.
+
+Since then (see `status.md`): phase 0 and the phase-1 gate done (17 Nov, Luca); the protocol
+frozen as `protocol-v1` with D20–D23 (18 Nov, Matteo); the GRU runs of both tasks moved to
+week 2 (plan `docs/plans/2026-11-18/23-11-Week2GruRunsAndHandoff/`).
 
 ## 4. One protocol for both tasks
 
@@ -128,7 +132,7 @@ we know. Thinning costs no training and is already built, so it stays in either 
 ## 7. Rules for the runs
 
 1. **Freeze first.** No run counts before the tag `protocol-v1`. A later change to the
-   protocol is a decision in `docs/decisions.md`, and the affected runs are repeated.
+   protocol is a decision in `docs/log/decisions.md`, and the affected runs are repeated.
 2. **Validation for choices, test for results.** Tuning and early stopping use the validation
    split only.
 3. **Every run is reproducible:** resolved config and git commit saved with it; run name from
@@ -136,13 +140,13 @@ we know. Thinning costs no training and is already built, so it stays in either 
 4. **One table of results.** A script collects every `metrics.json` into one file in
    `results/`. Figures and tables are made from that file only.
 5. **Primary measures are fixed** (M1–M4). Anything else in the report is marked as exploratory.
-6. **One owner per phase,** one line in `docs/ledger.md` when it starts and when it ends.
+6. **One owner per phase,** one line in `docs/log/work_ledger.md` when it starts and when it ends.
 
 ## 8. Steps
 
 1. Team: accept or change P1, P4, P5, P6, P8 and the order in section 5. Record them in
-   `docs/decisions.md`; update `docs/experiments.md` (add E5, the 25-variable contrast, the
-   order) and `docs/work_plan.md`.
+   `docs/log/decisions.md`; update `docs/current/experiments.md` (add E5, the 25-variable contrast, the
+   order) and `docs/current/work_plan.md`.
 2. Phase 0 code, each with a test on synthetic data: cut at ICU hour 59 in the data config;
    paired bootstrap in `eval/`; per-variable matched random removal in `perturb/`; hour-59 check
    in `scripts/check_data.py`; git commit in the saved config; results collector.

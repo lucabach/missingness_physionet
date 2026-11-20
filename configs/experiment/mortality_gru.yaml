@@ -13,3 +13,9 @@ train:
   patience: 5        # early stopping on validation AUROC
 eval:
   n_boot: 1000       # patient bootstrap resamples for 95% CIs
+# Chosen by the tuning sweep (2026-11-19, scripts/pick_config.py): best
+# validation AUROC 0.8796 of 8 configurations, `all` inputs, seed 0.
+tuned:
+  model.hidden_size: 128
+  train.lr: 3.0e-04
+  train.weight_decay: 1.0e-05

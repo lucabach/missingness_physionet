@@ -1,5 +1,7 @@
 # TA feedback (Sarah Martinson)
 
+*Kind: log (add one section per meeting with Sarah). Map of all docs: [docs/README.md](../README.md).*
+
 ## Proposal meeting, 6 Nov 2026
 
 1. **Wording:** say "sensitivity to measurement changes", not "reliance" (too strong).

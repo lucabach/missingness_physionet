@@ -1,5 +1,7 @@
 # Cluster notes
 
+*Kind: living (fill in what actually worked). Map of all docs: [docs/README.md](../README.md).*
+
 To be filled in by whoever sets up the cluster (week 2–3). Record what actually worked:
 
 - Login host and how to get access:

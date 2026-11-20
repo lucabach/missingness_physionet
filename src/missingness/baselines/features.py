@@ -8,8 +8,11 @@ from data up to that step. Feature sets (mirroring the deep-model input variants
     time     hours since ICU admission (sepsis only; mortality always predicts at 48 h)
     all      pattern + values
 
-Values are imputed with the training mean so that "never measured" is not visible to the
-values-only models; otherwise a tree could read the pattern from the missing entries.
+Values are imputed with the training mean before the first measurement, so the values-only
+features carry no explicit missingness indicator. They still leak some timing: a tree can
+split exactly at the training mean and so find "not measured yet", and forward-filled values
+stay constant between measurements. Δmask from these baselines is therefore a lower bound,
+as for the deep models (eval/scores.py).
 """
 
 from __future__ import annotations

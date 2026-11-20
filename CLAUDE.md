@@ -9,44 +9,53 @@ ETH Deep Learning HS26 group project "Values or Habits?". In ICU data, *whether 
 variable is measured carries information (sicker patients are tested more). We measure
 (1) how much predictive information the measurement pattern carries, (2) how sensitive
 trained GRU, GRU-D and ODE-RNN models are to changes in it, and (3) whether that sensitivity
-goes with larger losses at another hospital. Full proposal summary: `docs/project_overview.md`.
-Why two tasks and how to read the results: `docs/study_design.md`.
+goes with larger losses at another hospital. Full proposal summary: `docs/reference/project_overview.md`.
+Why two tasks and how to read the results: `docs/reference/study_design.md`.
 
 - **Tasks:** causal hourly sepsis prediction (PhysioNet 2019, two hospital systems) and
   in-hospital mortality from the first 48 h (PhysioNet 2012).
 - **Core models:** GRU (forward-filled inputs), GRU-D, ODE-RNN. **Extensions only:** Neural
-  CDE, Transformer, eICU. Do not grow the core scope without a decision in `docs/decisions.md`.
+  CDE, Transformer, eICU. Do not grow the core scope without a decision in `docs/log/decisions.md`.
 - **Experiments:** information ablation (values / pattern / all inputs), test-time removal
   (random vs state-dependent), rate-matched thinning of the same patients, cross-hospital
-  transfer. Matrix: `docs/experiments.md`.
+  transfer. Matrix: `docs/current/experiments.md`.
 
-## Where the plan and the method live (read at the start of every session)
+## The documents (read at the start of every session)
+
+All documents are in `docs/`, in three folders with one rule each (full map, file by file:
+`docs/README.md`):
+
+| Folder | Kind | Rule |
+| --- | --- | --- |
+| `docs/reference/` | static | proposal, study design, handoff template, bibliography. Do not rewrite; add a dated note if something is wrong |
+| `docs/current/` | living | `conclusions.md`, `work_plan.md`, `experiments.md`, `cluster.md`: always the current state; rewrite in place |
+| `docs/log/` | log | `decisions.md`, `work_ledger.md`, `ta_feedback.md`, `handoff_week_NN.md`: append only, never edit an old entry |
+| `docs/plans/` | plans | one folder per plan, layout below |
 
 | You want to know | Read |
 | --- | --- |
-| Why we run sepsis **and** mortality, what each result may be taken to mean, text for the report | `docs/study_design.md` |
-| What to do next, in which order, and the protocol every run follows | the active plan: `docs/plans/ledger.md` → its `plan.md`, `status.md`, and `handoff.md` if there is one |
-| Which runs exist (matrix, run counts) | `docs/experiments.md` |
-| Choices that change results | `docs/decisions.md` |
-| Who did what, on which branch | `docs/ledger.md` (list all branches with `bash scripts/ledger.sh`) |
-| Who does what in which week, and what must be ready for the next owner | `docs/work_plan.md` |
-| What happened in a week | `docs/handoffs/` |
+| Where things stand: results, what looks off, the questions for Sarah | `docs/current/conclusions.md` |
+| What the next person does | the newest `docs/log/handoff_week_NN.md` |
+| What to do next, in which order, and the protocol every run follows | the active plans: `docs/plans/ledger.md` → their `plan.md` and `status.md` |
+| Why we run sepsis **and** mortality, what each result may be taken to mean | `docs/reference/study_design.md` |
+| Which runs exist, run counts, commands | `docs/current/experiments.md` |
+| Choices that change results (D1, D2, ...; newest at the bottom of the table) | `docs/log/decisions.md` |
+| Who did what, on which branch | `docs/log/work_ledger.md` (all branches: `bash scripts/ledger.sh`) |
+| Who does what in which week | `docs/current/work_plan.md` |
 
 Start of a session, in this order: `bash scripts/ledger.sh`; `docs/plans/ledger.md` and the
-`status.md` (and `handoff.md`) of each active plan; the latest `docs/handoffs/week-NN.md`.
+`status.md` (and `handoff.md`) of each active plan; the newest `docs/log/handoff_week_NN.md`;
+`docs/current/conclusions.md`.
 
-**Two files are called ledger. They are different things.**
-
-- `docs/plans/ledger.md` is the **index of plans**: what we intend to do. Two sections, Active
-  and Noteworthy finished, one link per plan.
-- `docs/ledger.md` is the **work ledger**: what was done, by whom, on which branch. One line
-  per piece of work, append only.
+Do not confuse `docs/plans/ledger.md` (the **index of plans**: what we intend to do) with
+`docs/log/work_ledger.md` (the **work ledger**: what was done, by whom, one line per piece of
+work).
 
 **How a plan is stored.**
 
-```
+```text
 docs/plans/
-  ledger.md                          index of plans
+  ledger.md                          index of plans: Active, Noteworthy finished
   YYYY-MM-DD/HH-MM-ShortName/        day and time the plan was created
     plan.md                          goal, approach, steps; update it when the plan changes
     status.md                        first line "Status: active | done | dropped"; done, next, blockers
@@ -60,7 +69,7 @@ Keep `status.md` current as the work moves. A new plan gets a line under Active 
 (`docs/plans/2026-11-13/17-03-StudyPlanTwoTasks/plan.md`): problems and their fixes (section
 2), one protocol for both tasks (section 4), the four primary measures M1–M4 (section 4), the
 order of work with gates (section 5), the shift experiments (section 6) and the rules for runs
-(section 7). Where that plan and `docs/experiments.md` or `docs/work_plan.md` disagree, the
+(section 7). Where that plan and `docs/current/experiments.md` or `docs/current/work_plan.md` disagree, the
 plan is the newer proposal; items it marks as "proposed" are not decisions until they have a
 D-number, so ask a human before acting on them.
 
@@ -71,9 +80,13 @@ source .venv/bin/activate                     # setup: see README "Quick start"
 pytest                                        # all tests, synthetic data, ~10 s
 ruff check . --fix && ruff format .           # lint + format (CI enforces both)
 python -m missingness.train configs/experiment/smoke.yaml        # end-to-end smoke run
+LOCAL=1 bash slurm/submit_tuning.sh <task> <model>               # tuning sweep (D20)
+python scripts/pick_config.py <task> <model> --write             # freeze the tuned block
 python -m missingness.train configs/experiment/<task>_<model>.yaml inputs=<values|pattern|all> seed=<0|1|2>
 python -m missingness.evaluate outputs/<run> --perturb <random|state|thin|planted_off> [--p 0.10]
+python scripts/evaluate_runs.py                                   # standard evaluation of every run (D23)
 python scripts/collect_results.py                                 # all runs -> results/runs.csv
+python scripts/measures.py                                        # M1-M4 -> results/measures.csv
 python scripts/prepare_data.py physionet2019 physionet2012       # raw -> processed
 ```
 
@@ -99,6 +112,7 @@ src/missingness/
                       bootstrap_contrast, pre_onset_mask), scores (S, Δmask)
   experiment.py       load_data / predict / score_predictions shared by train and evaluate
   train.py, evaluate.py   CLI entry points
+  results.py          writes results/*.csv; --models updates one model's rows only
 configs/{data,model,experiment}/   all hyperparameters live here
 ```
 
@@ -117,7 +131,8 @@ configs/{data,model,experiment}/   all hyperparameters live here
    one logit per step `(B, T)`; mortality reads the last observed step via `label_mask`.
 5. **Model interface.** A model is `__init__(n_vars, n_static, inputs, **cfg)` +
    `forward(batch) -> logits (B, T)`, registered in `models/__init__.py::MODELS`, with a
-   `configs/model/<name>.yaml`. It must support the three input variants of `models/inputs.py`.
+   `configs/model/<name>.yaml`. It must support the three input variants of `models/inputs.py`
+   and pass `tests/test_models.py` (shape, causality, what each variant may see).
 6. **Same evaluation for everyone.** Use `eval.bootstrap_ci` (resamples patients, not
    hours) and `experiment.score_predictions`; for sepsis always report pre-onset hours too.
 7. **Config, not code.** Hyperparameters and paths go in `configs/` or env vars. A run must
@@ -147,7 +162,7 @@ configs/{data,model,experiment}/   all hyperparameters live here
 - Always cite the paper when mentioning SHAP, PhysioNet or MIMIC (and the datasets:
   Reyna et al. 2020 for 2019, Silva et al. 2012 for 2012, Goldberger et al. 2000 for PhysioNet).
   BibTeX keys are in the proposal's `references.bib`.
-- Full TA feedback with context: `docs/ta_feedback.md`.
+- Full TA feedback with context: `docs/log/ta_feedback.md`.
 
 ## Data rules
 
@@ -168,12 +183,13 @@ configs/{data,model,experiment}/   all hyperparameters live here
 - **Commits** are made under the human teammate's own name. Do not add AI co-author
   trailers or "Generated with ..." lines to commits or PR descriptions.
 - **Decisions.** Any choice that changes results (preprocessing, label, split, metric,
-  removal definition, model scope) gets an entry in `docs/decisions.md`.
+  removal definition, model scope) gets an entry in `docs/log/decisions.md`.
 - **Work ledger.** Before starting, run `bash scripts/ledger.sh` to see what the others
   are working on, on every branch. Before pushing, add your line at the bottom of
-  `docs/ledger.md` (one line per piece of work, append only; rules at the top of the file).
+  `docs/log/work_ledger.md` (one line per piece of work, append only; rules at the top of the file).
 - **Weekly relay.** One owner per week; on Sunday the owner writes
-  `docs/handoffs/week-NN.md` from the template. Read the latest handoff before starting work.
+  `docs/log/handoff_week_NN.md` from `docs/reference/handoff_template.md`. Read the latest
+  handoff before starting work.
 - **Notebooks** are for exploration; move reusable code into `src/missingness/`. Outputs are
   stripped by the pre-commit hook. Name them `NN_initials_topic.ipynb`.
 - Style: ruff (line length 100), type hints on public functions, short docstrings that say
@@ -181,5 +197,5 @@ configs/{data,model,experiment}/   all hyperparameters live here
 
 ## Open items an agent should not decide alone
 
-See `docs/decisions.md` → "Open questions" (e.g. final label choice, which hospital trains,
+See `docs/log/decisions.md` → "Open questions" (e.g. final label choice, which hospital trains,
 state-dependent removal definition). Ask the human instead of picking silently.
