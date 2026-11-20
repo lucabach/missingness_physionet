@@ -2,6 +2,12 @@
 
 *Kind: log (the handoff from week 2 to week 3; frozen after the handoff call). Map of all docs: [docs/README.md](../README.md).*
 
+**What week 2 found, one figure per finding: [section 2](#2-what-the-gru-found-with-figures).**
+In one line: the measurement pattern is informative but mostly repeats the values; the GRU is
+not more sensitive to state-dependent removal than to random removal; it picks up a planted
+pattern in proportion to its strength and then suffers when that pattern changes; with the
+pattern it loses more at hospital 2 (interval includes 0).
+
 Read this first, then `docs/current/conclusions.md` (what we found and the questions for Sarah).
 Luca's handoff of 17 Nov, with every check of phase 0, is kept as
 `docs/log/handoff_week_02_phase0_luca.md`; its findings, updated, are in `docs/current/conclusions.md`,
@@ -23,15 +29,62 @@ its decisions in `docs/log/decisions.md`. Which document is static, living or a 
    models before setting up the cluster; you may not need it.
 5. Open for you: Q5 (which implementations to port); record your choice as D25 and D26.
 
-## 2. What the GRU found (details: `docs/current/conclusions.md`)
+## 2. What the GRU found, with figures
 
-- The pattern carries a lot but mostly repeats the values: the mask adds +0.009 AUROC for
-  mortality and +0.029 for sepsis (hospital 1, pre-onset).
-- No extra sensitivity to state-dependent removal on either task (M2 ≈ 0).
-- The planted pattern (D24) is found in proportion to its strength, and switching it off
-  costs the `all` model more than it gained; the `values` model never uses it.
-- Sepsis: with the pattern the GRU loses more at hospital 2 and under thinning (M4 +0.022 and
-  +0.012, intervals partly include 0).
+All numbers are test AUROC, means of 3 seeds. Sepsis models are trained on hospital 1 and
+scored on the hours before onset. Intervals are 95% paired patient bootstraps. Every number
+and its discussion: `docs/current/conclusions.md`.
+
+The figures come from `python scripts/plot_findings.py`, which reads only
+`results/runs.csv` and `results/measures.csv`. Once your rows are in, run it with
+`--model grud` and `--model odernn` to get the same four figures for your models.
+
+### 2.1 Information (M1): the pattern carries a lot, but mostly what the values already say
+
+![M1: test AUROC of the pattern, values and all GRU on mortality and sepsis](../../results/findings_gru_1_information.png)
+
+- The `pattern` GRU gets 73% (mortality) and 83% (sepsis) of the way from chance to the full
+  model (the share S).
+- Added to the values, the pattern gains little: Δmask +0.009 [0.002, 0.017] for mortality,
+  +0.029 [0.005, 0.055] for sepsis.
+- Δmask is a lower bound, because forward-filled values leak timing. For GRU-D the `values`
+  variant is a plain GRU; say so wherever it is reported.
+
+### 2.2 Removal (M2): no extra sensitivity to state-dependent removal
+
+![M2: AUROC lost under random and state-dependent removal, and M2 with intervals](../../results/findings_gru_2_removal.png)
+
+- Left and middle: AUROC lost when a share p of the values is removed, at random (solid) or
+  from busy hours (state-dependent, dashed). Every loss is at most 0.013.
+- Right: M2 = (state-dependent − random) for `all`, minus the same for `values`. Every
+  interval covers 0.
+- State-dependent removal even hurts less for sepsis at p = 10%: the extra tests of a busy
+  hour mostly repeat what was just measured.
+- Caveat: only 17–24% of the values are such extras, so p stops at 15% (question 2 for Sarah).
+
+### 2.3 Planted pattern (M3): found in proportion to its strength
+
+![M3: mortality AUROC with the planted heart-rate rule on and switched off, per strength](../../results/findings_gru_3_planted.png)
+
+- Mortality, heart rate kept with probability q1 for deaths and q1/strength for survivors.
+  "Switched off": the same test patients, every patient keeps heart rate at one rate.
+- Left, D21 (q1 = 1): a missing heart-rate value meant "survivor", so `all` reached 0.999 at
+  every strength and there was nothing left to measure. GRU only.
+- Right, D24 (q1 = 0.8), the design you run: `all` gains +0.005, +0.015 and +0.069 at strength
+  1.05, 1.1 and 1.2. Switched off at 1.2 it falls to 0.797, below `values` (0.862).
+- `values` stays flat: it never uses the planted pattern.
+
+### 2.4 Transfer (M4): with the pattern, more loss at hospital 2
+
+![M4: sepsis AUROC at hospital 1, thinned hospital 1 and hospital 2, and M4 with intervals](../../results/findings_gru_4_transfer.png)
+
+- Left: the sepsis GRU on hospital 1, on the same hospital-1 test patients thinned to
+  hospital-2 measurement rates, and on hospital 2. `all` drops 0.060, `values` 0.038.
+- Right: M4 = the extra loss of `all` over `values`. At hospital 2 +0.022 [−0.013, 0.056]
+  (about 120 septic test patients there, so the interval includes 0); under thinning +0.012
+  [−0.002, 0.024]. On the 25 variables both hospitals measure alike, the picture is the same.
+- Thinning removes values as well as changing the pattern, hence the comparison with
+  `values`. RQ3 is an exploratory association.
 
 Your runs answer whether GRU-D and ODE-RNN, which use the gaps directly, behave the same.
 
@@ -207,4 +260,5 @@ python scripts/pick_config.py <task> gru --inputs values
 # and the first, saturated planted design (D21), GRU only:
 Q1=1.0 STRENGTHS="1 1.5 2 4" MODELS=gru LOCAL=1 bash slurm/submit_planted.sh
 python scripts/evaluate_runs.py && python scripts/collect_results.py && python scripts/measures.py
+python scripts/plot_findings.py                             # the figures of section 2
 ```

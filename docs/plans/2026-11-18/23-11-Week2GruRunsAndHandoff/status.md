@@ -29,6 +29,9 @@ Status: active
   early-stopping fix).
 - 20 Nov: PR #5 merged into `main` by Matteo, without a second review, so that `main` is
   ready for Giulio's handoff.
+- 20 Nov: the handoff shows the four GRU findings with one figure each (section 2, linked at
+  the top); `scripts/plot_findings.py` draws them, with `--model grud|odernn` for week 3.
+  Branch `matteo/handoff-figures`, not pushed yet.
 
 ## Next
 
