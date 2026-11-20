@@ -1,0 +1,55 @@
+{
+  "weights": {
+    "physionet2012_grud_all_seed0": 0.16666666666666666,
+    "physionet2012_grud_all_seed1": 0.16666666666666666,
+    "physionet2012_grud_all_seed2": 0.16666666666666666,
+    "physionet2012_odernn_all_seed0": 0.16666666666666666,
+    "physionet2012_odernn_all_seed1": 0.16666666666666666,
+    "physionet2012_odernn_all_seed2": 0.16666666666666666
+  },
+  "selection": "grud_fraction_0.5",
+  "validation_auroc": {
+    "single_0": 0.8790683771076523,
+    "single_1": 0.8717726572632943,
+    "single_2": 0.8748961373216602,
+    "single_3": 0.8725883592736707,
+    "single_4": 0.8707568296044099,
+    "single_5": 0.8725275616083009,
+    "grud_fraction_0": 0.8775636348897535,
+    "grud_fraction_0.25": 0.8812368271725032,
+    "grud_fraction_0.5": 0.8828378323605708,
+    "grud_fraction_0.75": 0.8827213035019456,
+    "grud_fraction_1": 0.8801323362516212
+  },
+  "checkpoint_order": [
+    "physionet2012_grud_all_seed0",
+    "physionet2012_grud_all_seed1",
+    "physionet2012_grud_all_seed2",
+    "physionet2012_odernn_all_seed0",
+    "physionet2012_odernn_all_seed1",
+    "physionet2012_odernn_all_seed2"
+  ],
+  "best_individual": "single_0",
+  "test": {
+    "test": {
+      "all/auroc": {
+        "value": 0.8742966726036271,
+        "lo": 0.8528912054321468,
+        "hi": 0.8966315959374617,
+        "n_boot": 1000
+      },
+      "all/auprc": {
+        "value": 0.5514548252567815,
+        "lo": 0.48884280844254296,
+        "hi": 0.6180448235637034,
+        "n_boot": 1000
+      },
+      "headline_gain_vs_best_individual": {
+        "value": 0.0018721664507773683,
+        "lo": -0.0036627316081736553,
+        "hi": 0.007335355978875423,
+        "n_boot": 1000
+      }
+    }
+  }
+}
