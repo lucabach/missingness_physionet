@@ -4,9 +4,6 @@ For each model and input variant: one logit per hour, shape (B, T), and causalit
 at hour t does not change when the record is changed after hour t. The variant must also
 matter: `values` must not react to a change of the mask alone, `pattern` must not react to a
 change of the values alone.
-
-GRU-D and ODE-RNN are stubs until week 3; their tests are expected to fail until then
-(``xfail``). Remove a model from ``STUBS`` when it is implemented.
 """
 
 from __future__ import annotations
@@ -20,7 +17,6 @@ from missingness.data.synthetic import make_synthetic
 from missingness.models import MODELS, build_model
 from missingness.models.inputs import INPUT_VARIANTS
 
-STUBS = {"grud", "odernn"}  # week 3: remove each name once the model is implemented
 T_CUT = 6
 
 
@@ -39,9 +35,8 @@ def _batch(records):
 
 def _cases():
     for name in sorted(MODELS):
-        marks = [pytest.mark.xfail(reason="week-3 stub", strict=True)] if name in STUBS else []
         for inputs in INPUT_VARIANTS:
-            yield pytest.param(name, inputs, marks=marks, id=f"{name}-{inputs}")
+            yield pytest.param(name, inputs, id=f"{name}-{inputs}")
 
 
 @pytest.mark.parametrize(("name", "inputs"), list(_cases()))
@@ -85,3 +80,20 @@ def test_model_ignores_what_its_variant_hides(name, inputs):
         changed["static"] = batch["static"] + 3.0
     with torch.no_grad():
         assert torch.allclose(model(batch), model(changed), atol=1e-5)
+
+
+@pytest.mark.parametrize("name", ["grud", "odernn"])
+def test_time_dynamics_receive_training_gradients(name):
+    """A plain GRU could pass the shape and causality checks without learning any decay/drift."""
+    torch.manual_seed(4)
+    batch = _batch(make_synthetic(n_patients=4, n_vars=4, n_static=2, seed=5))
+    model = build_model(_cfg(name), n_vars=4, n_static=2, inputs="all")
+    model(batch)[batch["label_mask"]].sum().backward()
+    params = (
+        [model.hidden_decay.weight, model.input_scale]
+        if name == "grud"
+        else list(model.drift.parameters())
+    )
+    for param in params:
+        assert param.grad is not None and torch.isfinite(param.grad).all()
+        assert param.grad.abs().sum() > 0
