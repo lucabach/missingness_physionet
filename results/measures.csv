@@ -99,3 +99,167 @@ M3_loss_off,mortality,physionet2012,gru,s=2.0,test,all,auroc,3,0.2746,0.2481,0.3
 M3_loss_off,mortality,physionet2012,gru,s=4.0,test,all,auroc,3,0.2568,0.2303,0.2843,"[0.2333, 0.2715, 0.2655]",,1.0,all
 M3_loss_off,mortality,physionet2012,gru,s=4.0,test,all,auroc,3,0.002,0.0007,0.0033,"[0.0021, 0.0022, 0.0016]",,1.0,values
 M3_loss_off,mortality,physionet2012,gru,s=4.0,test,all,auroc,3,0.2548,0.2286,0.2823,"[0.2312, 0.2693, 0.264]",,1.0,all-values
+M1_delta_mask,mortality,physionet2012,grud,,test,all,auroc,3,0.0124,0.0044,0.0205,"[0.0159, 0.0081, 0.0134]",0.693,,
+M2_state_vs_random,mortality,physionet2012,grud,p=0.05,test,all,auroc,3,0.0011,-0.002,0.0042,"[0.0003, 0.0015, 0.0014]",,,
+M2_state_vs_random,mortality,physionet2012,grud,p=0.1,test,all,auroc,3,0.0021,-0.0027,0.0067,"[0.0013, 0.0005, 0.0045]",,,
+M2_state_vs_random,mortality,physionet2012,grud,p=0.15,test,all,auroc,3,0.002,-0.0038,0.0079,"[-0.0006, 0.0046, 0.0021]",,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital1,all,auroc,3,0.0342,0.0127,0.0591,"[0.0493, 0.0299, 0.0233]",0.854,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital1,pre_onset,auroc,3,0.0262,0.0033,0.0513,"[0.0407, 0.0254, 0.0124]",0.854,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0221,-0.0031,0.048,"[0.0389, 0.0166, 0.0108]",0.854,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital2,all,auroc,3,-0.0093,-0.0346,0.0148,"[-0.0129, 0.0168, -0.0317]",0.965,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital2,pre_onset,auroc,3,-0.0011,-0.0287,0.0236,"[-0.0002, 0.0202, -0.0231]",0.965,,
+M1_delta_mask,sepsis,physionet2019,grud,,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.0482,-0.0814,-0.0172,"[-0.0581, -0.0274, -0.059]",0.965,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital1,all,auroc,3,-0.0019,-0.0087,0.0039,"[-0.0018, -0.001, -0.0029]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital1,pre_onset,auroc,3,-0.0025,-0.0094,0.0037,"[-0.0035, -0.0011, -0.003]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0033,-0.0118,0.0032,"[-0.0045, -0.0016, -0.0039]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital2,all,auroc,3,-0.0041,-0.0108,0.0018,"[-0.0026, -0.0084, -0.0013]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital2,pre_onset,auroc,3,-0.0062,-0.0142,0.0007,"[-0.0069, -0.0091, -0.0027]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.05,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.0113,-0.0227,-0.0015,"[-0.0109, -0.0163, -0.0066]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital1,all,auroc,3,-0.0011,-0.0065,0.0047,"[-0.0024, 0.0002, -0.0011]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital1,pre_onset,auroc,3,-0.0008,-0.007,0.0056,"[-0.0023, -0.0, -0.0002]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0001,-0.0081,0.0067,"[-0.0018, 0.0008, 0.0006]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital2,all,auroc,3,0.0097,-0.0021,0.022,"[0.0134, 0.0108, 0.0049]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital2,pre_onset,auroc,3,0.0075,-0.0053,0.0213,"[0.0106, 0.0075, 0.0043]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.1,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0113,-0.0072,0.0305,"[0.0169, 0.0108, 0.0062]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital1,all,auroc,3,0.0102,0.0027,0.0184,"[0.012, 0.0135, 0.005]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital1,pre_onset,auroc,3,0.0102,0.0026,0.0181,"[0.0124, 0.0142, 0.0041]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.011,0.0021,0.0201,"[0.0142, 0.0141, 0.0046]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital2,all,auroc,3,0.0102,0.0009,0.0204,"[0.0146, 0.0026, 0.0133]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital2,pre_onset,auroc,3,0.0093,-0.0004,0.02,"[0.01, 0.0052, 0.0127]",,,
+M2_state_vs_random,sepsis,physionet2019,grud,p=0.15,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0107,-0.0052,0.027,"[0.012, 0.0072, 0.0129]",,,
+M4_thinning,sepsis,physionet2019,grud,,test_hospital1,all,auroc,9,0.0255,0.0132,0.0384,"[0.0272, 0.0326, 0.0307, 0.0241, 0.033, 0.0246, 0.0209, 0.0156, 0.021]",,,
+M4_thinning,sepsis,physionet2019,grud,,test_hospital1,pre_onset,auroc,9,0.0212,0.0094,0.0341,"[0.0222, 0.0276, 0.0261, 0.022, 0.0282, 0.0202, 0.0164, 0.011, 0.0172]",,,
+M4_thinning,sepsis,physionet2019,grud,,test_hospital1,pre_onset_excl_positive_at_start,auroc,9,0.0267,0.0133,0.0403,"[0.0298, 0.0382, 0.0332, 0.0261, 0.0343, 0.0252, 0.0183, 0.0156, 0.0198]",,,
+M4_transfer,sepsis,physionet2019,grud,,h1-h2,all,auroc,3,0.0434,0.0107,0.0792,,,,
+M4_transfer,sepsis,physionet2019,grud,,h1-h2,pre_onset,auroc,3,0.0273,-0.0063,0.0625,,,,
+M4_transfer,sepsis,physionet2019,grud,,h1-h2,pre_onset_excl_positive_at_start,auroc,3,0.0703,0.0299,0.1114,,,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital1,all,auroc,3,0.0281,0.0078,0.0496,"[0.0297, 0.0335, 0.0211]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital1,pre_onset,auroc,3,0.0233,0.0026,0.045,"[0.0252, 0.0275, 0.0173]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0224,0.0002,0.0487,"[0.0282, 0.0266, 0.0124]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital2,all,auroc,3,0.0149,-0.0105,0.0371,"[-0.0036, 0.0369, 0.0115]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital2,pre_onset,auroc,3,0.0095,-0.0143,0.0319,"[-0.0053, 0.0245, 0.0093]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,grud,,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0022,-0.0327,0.0385,"[-0.019, 0.0063, 0.0192]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital1,all,auroc,3,0.0035,-0.0016,0.0086,"[0.0021, 0.0062, 0.0021]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital1,pre_onset,auroc,3,0.0039,-0.0014,0.0094,"[0.0014, 0.0084, 0.002]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0056,-0.0005,0.0115,"[0.0023, 0.0113, 0.0031]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital2,all,auroc,3,0.0045,-0.0016,0.0109,"[0.0073, 0.0041, 0.0022]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital2,pre_onset,auroc,3,0.0042,-0.002,0.0116,"[0.0046, 0.0052, 0.0029]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.05,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.007,-0.0015,0.0167,"[0.0112, 0.0088, 0.0011]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital1,all,auroc,3,-0.005,-0.0118,0.0022,"[-0.0065, -0.0036, -0.0048]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital1,pre_onset,auroc,3,-0.0051,-0.013,0.0027,"[-0.0081, -0.0033, -0.004]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0057,-0.015,0.003,"[-0.0089, -0.0035, -0.0047]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital2,all,auroc,3,-0.0074,-0.0181,0.0028,"[-0.0089, -0.0003, -0.0132]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital2,pre_onset,auroc,3,-0.0081,-0.0184,0.0023,"[-0.0048, -0.0051, -0.0143]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.1,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.013,-0.029,0.0013,"[-0.0077, -0.0078, -0.0236]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital1,all,auroc,3,0.0035,-0.0027,0.01,"[-0.0015, 0.0037, 0.0083]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital1,pre_onset,auroc,3,0.0048,-0.0025,0.0124,"[-0.0007, 0.0046, 0.0103]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0043,-0.0045,0.0128,"[-0.0019, 0.0037, 0.011]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital2,all,auroc,3,-0.0014,-0.0161,0.011,"[-0.0029, -0.0004, -0.0009]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital2,pre_onset,auroc,3,-0.0007,-0.016,0.0125,"[-0.0024, 0.0035, -0.003]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,grud,p=0.15,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0009,-0.0225,0.0238,"[-0.0019, 0.0052, -0.0004]",,,
+M4_thinning,sepsis,physionet2019_comparable,grud,,test_hospital1,all,auroc,9,0.0099,0.0033,0.0167,"[0.0097, 0.0111, 0.0158, 0.0062, 0.0081, 0.0151, 0.0027, 0.006, 0.0148]",,,
+M4_thinning,sepsis,physionet2019_comparable,grud,,test_hospital1,pre_onset,auroc,9,0.0098,0.0029,0.0165,"[0.0093, 0.0093, 0.0166, 0.0062, 0.0093, 0.0163, 0.0017, 0.0057, 0.0136]",,,
+M4_thinning,sepsis,physionet2019_comparable,grud,,test_hospital1,pre_onset_excl_positive_at_start,auroc,9,0.01,0.0023,0.0179,"[0.0103, 0.0114, 0.0211, 0.0018, 0.0077, 0.0174, -0.0015, 0.006, 0.0152]",,,
+M4_transfer,sepsis,physionet2019_comparable,grud,,h1-h2,all,auroc,3,0.0132,-0.0188,0.0454,,,,
+M4_transfer,sepsis,physionet2019_comparable,grud,,h1-h2,pre_onset,auroc,3,0.0138,-0.0192,0.0465,,,,
+M4_transfer,sepsis,physionet2019_comparable,grud,,h1-h2,pre_onset_excl_positive_at_start,auroc,3,0.0202,-0.0242,0.0618,,,,
+M3_gain,mortality,physionet2012,grud,s=1.05,test,all,auroc,3,0.0033,-0.0013,0.0081,"[0.0069, 0.0058, -0.0027]",,0.8,all
+M3_gain,mortality,physionet2012,grud,s=1.1,test,all,auroc,3,0.0073,0.0,0.0151,"[0.0139, 0.0044, 0.0036]",,0.8,all
+M3_gain,mortality,physionet2012,grud,s=1.2,test,all,auroc,3,0.0594,0.0456,0.0739,"[0.0599, 0.0566, 0.0618]",,0.8,all
+M3_gain,mortality,physionet2012,grud,s=1.05,test,all,auroc,3,0.0,-0.0002,0.0002,"[0.0001, -0.0001, 0.0001]",,0.8,values
+M3_gain,mortality,physionet2012,grud,s=1.1,test,all,auroc,3,-0.0001,-0.0004,0.0003,"[-0.0, -0.0002, 0.0]",,0.8,values
+M3_gain,mortality,physionet2012,grud,s=1.2,test,all,auroc,3,-0.0001,-0.0005,0.0004,"[-0.0003, -0.0001, 0.0]",,0.8,values
+M3_loss_off,mortality,physionet2012,grud,s=1.0,test,all,auroc,3,0.0008,-0.0006,0.0026,"[0.0008, 0.0005, 0.001]",,0.8,all
+M3_loss_off,mortality,physionet2012,grud,s=1.0,test,all,auroc,3,0.0012,-0.0006,0.0039,"[0.0011, 0.0016, 0.0009]",,0.8,values
+M3_loss_off,mortality,physionet2012,grud,s=1.0,test,all,auroc,3,-0.0004,-0.0014,0.0004,"[-0.0003, -0.0012, 0.0002]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,grud,s=1.05,test,all,auroc,3,0.0036,0.0013,0.0059,"[0.0036, 0.0039, 0.0032]",,0.8,all
+M3_loss_off,mortality,physionet2012,grud,s=1.05,test,all,auroc,3,0.0011,-0.0007,0.0038,"[0.001, 0.0015, 0.0009]",,0.8,values
+M3_loss_off,mortality,physionet2012,grud,s=1.05,test,all,auroc,3,0.0024,0.0004,0.0043,"[0.0026, 0.0023, 0.0023]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,grud,s=1.1,test,all,auroc,3,0.021,0.0152,0.0267,"[0.0168, 0.0257, 0.0205]",,0.8,all
+M3_loss_off,mortality,physionet2012,grud,s=1.1,test,all,auroc,3,0.0012,-0.0006,0.0039,"[0.0012, 0.0016, 0.0009]",,0.8,values
+M3_loss_off,mortality,physionet2012,grud,s=1.1,test,all,auroc,3,0.0198,0.0138,0.0258,"[0.0156, 0.0242, 0.0197]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,grud,s=1.2,test,all,auroc,3,0.1184,0.1002,0.1365,"[0.1321, 0.1176, 0.1054]",,0.8,all
+M3_loss_off,mortality,physionet2012,grud,s=1.2,test,all,auroc,3,0.0012,-0.0006,0.0039,"[0.0011, 0.0017, 0.0009]",,0.8,values
+M3_loss_off,mortality,physionet2012,grud,s=1.2,test,all,auroc,3,0.1172,0.099,0.1357,"[0.131, 0.116, 0.1045]",,0.8,all-values
+M1_delta_mask,mortality,physionet2012,odernn,,test,all,auroc,3,0.004,-0.0039,0.0124,"[-0.0011, 0.0088, 0.0042]",0.649,,
+M2_state_vs_random,mortality,physionet2012,odernn,p=0.05,test,all,auroc,3,0.0004,-0.0014,0.0021,"[0.0003, 0.0002, 0.0007]",,,
+M2_state_vs_random,mortality,physionet2012,odernn,p=0.1,test,all,auroc,3,-0.0015,-0.0039,0.0011,"[-0.0001, -0.0022, -0.0021]",,,
+M2_state_vs_random,mortality,physionet2012,odernn,p=0.15,test,all,auroc,3,-0.0009,-0.0039,0.0022,"[-0.0009, 0.0014, -0.0031]",,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital1,all,auroc,3,0.0503,0.0303,0.0724,"[0.0653, 0.0452, 0.0405]",0.842,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital1,pre_onset,auroc,3,0.0426,0.022,0.0637,"[0.0591, 0.0273, 0.0415]",0.842,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0516,0.0299,0.0762,"[0.0727, 0.0434, 0.0388]",0.842,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital2,all,auroc,3,0.028,0.0053,0.0493,"[0.0683, -0.0146, 0.0302]",0.805,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital2,pre_onset,auroc,3,0.0251,0.0019,0.0472,"[0.0612, -0.0171, 0.0311]",0.805,,
+M1_delta_mask,sepsis,physionet2019,odernn,,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0145,-0.0199,0.0486,"[0.064, -0.0417, 0.0212]",0.805,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital1,all,auroc,3,-0.0023,-0.0071,0.0021,"[-0.0021, -0.0024, -0.0024]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital1,pre_onset,auroc,3,-0.0025,-0.0082,0.0025,"[-0.002, -0.0035, -0.0021]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0028,-0.0096,0.0028,"[-0.0018, -0.0042, -0.0023]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital2,all,auroc,3,0.0041,-0.0029,0.0118,"[0.0092, 0.0005, 0.0026]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital2,pre_onset,auroc,3,0.005,-0.0032,0.0154,"[0.0097, 0.0003, 0.005]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.05,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0071,-0.0058,0.0236,"[0.0127, 0.0007, 0.0078]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital1,all,auroc,3,0.0026,-0.0021,0.0074,"[0.0026, 0.002, 0.0032]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital1,pre_onset,auroc,3,0.0025,-0.003,0.008,"[0.0025, 0.0018, 0.0033]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0038,-0.0027,0.011,"[0.0036, 0.0033, 0.0045]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital2,all,auroc,3,-0.0032,-0.01,0.0027,"[0.0012, -0.0055, -0.0054]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital2,pre_onset,auroc,3,-0.0031,-0.0092,0.0029,"[0.0012, -0.0067, -0.0038]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.1,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.0032,-0.013,0.0066,"[0.002, -0.0091, -0.0026]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital1,all,auroc,3,0.0046,-0.0021,0.0114,"[0.0047, 0.006, 0.003]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital1,pre_onset,auroc,3,0.0043,-0.0034,0.012,"[0.003, 0.0049, 0.0051]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0041,-0.0044,0.0143,"[0.0021, 0.0044, 0.0058]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital2,all,auroc,3,0.0015,-0.0048,0.0079,"[-0.0027, 0.0094, -0.0022]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital2,pre_onset,auroc,3,0.0036,-0.0031,0.0102,"[-0.0006, 0.0134, -0.002]",,,
+M2_state_vs_random,sepsis,physionet2019,odernn,p=0.15,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0021,-0.0066,0.0113,"[-0.0066, 0.017, -0.004]",,,
+M4_thinning,sepsis,physionet2019,odernn,,test_hospital1,all,auroc,9,0.0202,0.0096,0.032,"[0.0245, 0.0225, 0.0215, 0.0218, 0.0196, 0.0183, 0.0188, 0.0146, 0.02]",,,
+M4_thinning,sepsis,physionet2019,odernn,,test_hospital1,pre_onset,auroc,9,0.0138,0.0034,0.0253,"[0.0195, 0.0196, 0.0147, 0.0145, 0.01, 0.0099, 0.013, 0.0098, 0.0136]",,,
+M4_thinning,sepsis,physionet2019,odernn,,test_hospital1,pre_onset_excl_positive_at_start,auroc,9,0.0233,0.0117,0.0347,"[0.03, 0.0294, 0.0253, 0.0248, 0.0192, 0.0201, 0.0218, 0.0166, 0.022]",,,
+M4_transfer,sepsis,physionet2019,odernn,,h1-h2,all,auroc,3,0.0223,-0.0067,0.0558,,,,
+M4_transfer,sepsis,physionet2019,odernn,,h1-h2,pre_onset,auroc,3,0.0176,-0.0125,0.0493,,,,
+M4_transfer,sepsis,physionet2019,odernn,,h1-h2,pre_onset_excl_positive_at_start,auroc,3,0.0371,0.0012,0.0793,,,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital1,all,auroc,3,0.0197,0.0044,0.0371,"[0.0239, 0.0251, 0.0101]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital1,pre_onset,auroc,3,0.0086,-0.0073,0.0261,"[0.013, 0.0105, 0.0024]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0103,-0.0094,0.0315,"[0.0143, 0.0259, -0.0095]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital2,all,auroc,3,-0.0002,-0.0214,0.0217,"[0.0044, 0.0277, -0.0327]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital2,pre_onset,auroc,3,-0.0052,-0.0251,0.0171,"[0.0019, 0.0112, -0.0286]",,,
+M1_delta_mask,sepsis,physionet2019_comparable,odernn,,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.0031,-0.0332,0.0272,"[0.0119, 0.0484, -0.0696]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital1,all,auroc,3,-0.0014,-0.005,0.0024,"[-0.0028, -0.0016, 0.0003]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital1,pre_onset,auroc,3,-0.0011,-0.0054,0.0033,"[-0.0031, -0.0002, -0.0002]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0012,-0.0058,0.0038,"[-0.0035, -0.0001, 0.0002]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital2,all,auroc,3,-0.0016,-0.0083,0.005,"[0.0057, 0.0027, -0.0131]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital2,pre_onset,auroc,3,-0.0016,-0.0087,0.0059,"[0.0023, 0.0021, -0.0092]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.05,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,-0.0026,-0.0153,0.0086,"[0.0035, 0.0034, -0.0149]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital1,all,auroc,3,0.0001,-0.0055,0.0059,"[-0.0005, -0.002, 0.0029]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital1,pre_onset,auroc,3,-0.0039,-0.01,0.0021,"[-0.0045, -0.0057, -0.0015]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,-0.0049,-0.0118,0.0015,"[-0.0054, -0.008, -0.0012]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital2,all,auroc,3,0.0045,-0.0053,0.0128,"[-0.0003, 0.0061, 0.0077]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital2,pre_onset,auroc,3,0.0057,-0.0027,0.0138,"[0.0009, 0.0076, 0.0087]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.1,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0083,-0.0031,0.0205,"[0.0006, 0.0121, 0.0122]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital1,all,auroc,3,0.003,-0.0033,0.0094,"[-0.0004, 0.0029, 0.0064]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital1,pre_onset,auroc,3,0.0023,-0.0049,0.0101,"[-0.0, 0.0015, 0.0054]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital1,pre_onset_excl_positive_at_start,auroc,3,0.0036,-0.0046,0.0125,"[0.0008, 0.0028, 0.0072]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital2,all,auroc,3,0.0022,-0.0079,0.0142,"[-0.0038, 0.0024, 0.008]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital2,pre_onset,auroc,3,0.0047,-0.0058,0.0168,"[0.0005, 0.0045, 0.0091]",,,
+M2_state_vs_random,sepsis,physionet2019_comparable,odernn,p=0.15,test_hospital2,pre_onset_excl_positive_at_start,auroc,3,0.0077,-0.0086,0.0265,"[0.0027, 0.0064, 0.0141]",,,
+M4_thinning,sepsis,physionet2019_comparable,odernn,,test_hospital1,all,auroc,9,0.0092,0.0025,0.0167,"[0.0028, 0.0047, 0.0094, 0.0095, 0.0118, 0.0088, 0.0119, 0.0102, 0.0138]",,,
+M4_thinning,sepsis,physionet2019_comparable,odernn,,test_hospital1,pre_onset,auroc,9,0.007,0.0006,0.0144,"[0.001, 0.001, 0.0067, 0.0091, 0.0113, 0.0068, 0.0102, 0.0061, 0.0107]",,,
+M4_thinning,sepsis,physionet2019_comparable,odernn,,test_hospital1,pre_onset_excl_positive_at_start,auroc,9,0.0083,0.0006,0.0167,"[0.0014, 0.0023, 0.0076, 0.0093, 0.0145, 0.0075, 0.0114, 0.009, 0.0118]",,,
+M4_transfer,sepsis,physionet2019_comparable,odernn,,h1-h2,all,auroc,3,0.0199,-0.0062,0.048,,,,
+M4_transfer,sepsis,physionet2019_comparable,odernn,,h1-h2,pre_onset,auroc,3,0.0138,-0.0123,0.0409,,,,
+M4_transfer,sepsis,physionet2019_comparable,odernn,,h1-h2,pre_onset_excl_positive_at_start,auroc,3,0.0134,-0.0239,0.0516,,,,
+M3_gain,mortality,physionet2012,odernn,s=1.05,test,all,auroc,3,0.0007,-0.0025,0.0036,"[0.0023, -0.0048, 0.0046]",,0.8,all
+M3_gain,mortality,physionet2012,odernn,s=1.1,test,all,auroc,3,0.0029,-0.0017,0.0077,"[0.0055, -0.0047, 0.008]",,0.8,all
+M3_gain,mortality,physionet2012,odernn,s=1.2,test,all,auroc,3,0.0465,0.0308,0.0624,"[0.0516, 0.0455, 0.0425]",,0.8,all
+M3_gain,mortality,physionet2012,odernn,s=1.05,test,all,auroc,3,0.0031,-0.0004,0.0066,"[0.0028, 0.003, 0.0034]",,0.8,values
+M3_gain,mortality,physionet2012,odernn,s=1.1,test,all,auroc,3,-0.0001,-0.0038,0.0029,"[-0.0003, -0.0003, 0.0002]",,0.8,values
+M3_gain,mortality,physionet2012,odernn,s=1.2,test,all,auroc,3,0.0002,-0.0039,0.0041,"[0.002, -0.003, 0.0015]",,0.8,values
+M3_loss_off,mortality,physionet2012,odernn,s=1.0,test,all,auroc,3,0.0009,-0.0007,0.003,"[0.0012, 0.0009, 0.0006]",,0.8,all
+M3_loss_off,mortality,physionet2012,odernn,s=1.0,test,all,auroc,3,0.0014,-0.0007,0.0048,"[0.0009, 0.002, 0.0014]",,0.8,values
+M3_loss_off,mortality,physionet2012,odernn,s=1.0,test,all,auroc,3,-0.0005,-0.0019,0.0005,"[0.0004, -0.001, -0.0008]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,odernn,s=1.05,test,all,auroc,3,0.0023,0.0003,0.0047,"[0.0027, 0.0021, 0.0022]",,0.8,all
+M3_loss_off,mortality,physionet2012,odernn,s=1.05,test,all,auroc,3,0.001,-0.0006,0.0035,"[0.0009, 0.0011, 0.0011]",,0.8,values
+M3_loss_off,mortality,physionet2012,odernn,s=1.05,test,all,auroc,3,0.0013,0.0001,0.0025,"[0.0018, 0.001, 0.0011]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,odernn,s=1.1,test,all,auroc,3,0.0072,0.0034,0.0108,"[0.0082, 0.0073, 0.006]",,0.8,all
+M3_loss_off,mortality,physionet2012,odernn,s=1.1,test,all,auroc,3,0.0013,-0.0008,0.0044,"[0.0011, 0.0018, 0.001]",,0.8,values
+M3_loss_off,mortality,physionet2012,odernn,s=1.1,test,all,auroc,3,0.0059,0.0029,0.0087,"[0.0071, 0.0055, 0.005]",,0.8,all-values
+M3_loss_off,mortality,physionet2012,odernn,s=1.2,test,all,auroc,3,0.098,0.0821,0.1143,"[0.0883, 0.0958, 0.1101]",,0.8,all
+M3_loss_off,mortality,physionet2012,odernn,s=1.2,test,all,auroc,3,0.0013,-0.001,0.0048,"[0.001, 0.0014, 0.0015]",,0.8,values
+M3_loss_off,mortality,physionet2012,odernn,s=1.2,test,all,auroc,3,0.0967,0.081,0.1126,"[0.0873, 0.0944, 0.1086]",,0.8,all-values
