@@ -48,3 +48,4 @@ work. `area` is one of `data`, `perturb`, `models`, `baselines`, `eval`, `runs`,
 | 2026-11-20 | giulio+agent | giulio/week3 | models | start | Implemented GRU-D and ODE-RNN for the three input variants in the shared training pipeline | D25–D26 |
 | 2026-11-20 | giulio+agent | giulio/week3 | runs | done | Both deep models completed eight configurations per task and the full 96-run post-tuning matrix | D25–D26 |
 | 2026-11-24 | luca+agent | claude/project-thread-uxhuch | perturb | start | Whole-busy-hour removal (state vs matched random) at 20/25/30% for all three models; code and test in, runs pending | D27 (proposed) |
+| 2026-11-24 | luca+agent | claude/project-thread-uxhuch | runs | done | Cloud retrain of the 36 core runs reproduces the week-3 measures; whole-busy-hour removal at 20/25/30% gives M2 ≈ 0 (2 of 18 sepsis checks significant, no trend) | D27 (proposed), `results/cloud_retrain_2026-11-24/` |
