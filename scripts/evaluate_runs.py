@@ -2,6 +2,7 @@
 
     python scripts/evaluate_runs.py                          # every run in outputs/
     python scripts/evaluate_runs.py --runs 'physionet2012_gru_*' --dry-run
+    python scripts/evaluate_runs.py --hours        # only the whole-busy-hour removal (D27)
 
 Per run (tuning runs are skipped; evaluations that exist are skipped):
 
@@ -26,7 +27,15 @@ from missingness.evaluate import evaluate_run
 from missingness.paths import OUTPUT_DIR
 
 REMOVAL_P = (0.05, 0.10, 0.15)
+HOURS_P = (0.20, 0.25, 0.30)  # whole busy hours (D27), state_hours vs random_hours
 THIN_SEEDS = (0, 1, 2)
+
+
+def hours_jobs(cfg: dict) -> list[tuple[str, float | None, int]]:
+    """Whole-busy-hour removal (D27) for the `all` and `values` runs without a planted rule."""
+    if cfg.get("planted") or cfg["inputs"] not in ("all", "values"):
+        return []
+    return [(m, p, 0) for p in HOURS_P for m in ("random_hours", "state_hours")]
 
 
 def standard_jobs(cfg: dict) -> list[tuple[str, float | None, int]]:
@@ -44,12 +53,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--runs", default="*", help="glob of run folders inside outputs/")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--hours", action="store_true", help="only whole-busy-hour removal (D27)")
     args = ap.parse_args()
     for cfg_path in sorted(OUTPUT_DIR.glob(f"{args.runs}/config.yaml")):
         run = cfg_path.parent
         if run.name.startswith("tune_") or not (run / "metrics.json").exists():
             continue
-        jobs = standard_jobs(yaml.safe_load(cfg_path.read_text()))
+        cfg = yaml.safe_load(cfg_path.read_text())
+        jobs = hours_jobs(cfg) if args.hours else standard_jobs(cfg)
         if args.dry_run:
             print(run.name, jobs)
         elif jobs:

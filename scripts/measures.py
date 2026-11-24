@@ -14,7 +14,8 @@ Measures (AUROC differences; a positive value means what the name says):
 - M1 Δmask: all − values on the clean test set; S (pattern share) next to it when pattern
   runs exist.
 - M2: (random − state) for all minus (random − state) for values, per removal fraction p: the
-  extra loss under state-dependent removal that the pattern inputs add.
+  extra loss under state-dependent removal that the pattern inputs add. With whole busy hours
+  (D27) the same measure is ``M2_state_vs_random_hours`` at p 0.2, 0.25, 0.3.
 - M3 gain: rule on at strength s minus rule on at strength 1, per input variant (E5).
 - M3 loss_off: rule on minus rule off at strength s, per input variant, and all minus values.
   Each design of the rule (column ``planted_q1``: 1.0 for D21, 0.8 for D24) is kept apart.
@@ -175,13 +176,15 @@ def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dic
                 extra = {"S_all_rows": round(information_share(pa, aa), 3)}
             add("M1_delta_mask", key, "", ts, [ga, gv], [1, -1], task, extra)
 
-        for p in (0.05, 0.1, 0.15):  # M2
+        m2 = [("M2_state_vs_random", "", p) for p in (0.05, 0.1, 0.15)]
+        m2 += [("M2_state_vs_random_hours", "_hours", p) for p in (0.2, 0.25, 0.3)]
+        for name, suffix, p in m2:  # M2
             for ts in test_sets:
-                tags = [f"random_p{p}_seed0", f"state_p{p}_seed0"]
+                tags = [f"random{suffix}_p{p}_seed0", f"state{suffix}_p{p}_seed0"]
                 groups = [[load_pred(r, ts, t) for r in runs] for runs in (a, v) for t in tags]
                 if any(f is None for grp in groups for f in grp):
                     continue
-                add("M2_state_vs_random", key, f"p={p}", ts, groups, [1, -1, -1, 1], task)
+                add(name, key, f"p={p}", ts, groups, [1, -1, -1, 1], task)
 
         if "test_hospital2" in test_sets:  # M4
             thin = [f"thin_seed{t}" for t in (0, 1, 2)]
