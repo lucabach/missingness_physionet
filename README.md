@@ -99,9 +99,9 @@ the newest `docs/log/handoff_week_NN.md`.
 | Cut at ICU hour 59 (D15) | done; checked with `scripts/check_data.py` |
 | Removal and thinning | matched random vs state-dependent removal (D16), p ∈ {0.05, 0.10, 0.15} (D17), `results/removal_shares.csv`; thinned hospital-1 test sets rebuilt after the cut |
 | Paired bootstrap, results collector, git commit per run | done (D19, `scripts/collect_results.py`) |
-| Planted pattern (E5) | code and tests only; variable and q values to choose |
-| GRU + training/evaluation scripts | done; 1-epoch real runs work (sepsis and mortality) |
+| Planted pattern (E5) | mortality heart-rate rule at four strengths (D24), three seeds per input variant |
+| GRU + training/evaluation scripts | completed on both tasks, including transfer and perturbation evaluations |
 | Hospital 1 vs 2 comparison | done (`scripts/compare_hospitals.py`, `results/hospital_rates.*`) |
 | Classical baselines + SOFA check | done (`scripts/run_baselines.py`, `results/baselines.csv`, `results/sofa_check.csv`) |
-| GRU-D, ODE-RNN | stubs (week 3, Q5) |
+| GRU-D, ODE-RNN | implemented in the shared trainer with three input variants (D25 and D26). See [experiment matrix and predictor selection](docs/current/experiments.md) |
 | Neural CDE, Transformer | extensions (week 5), not started |

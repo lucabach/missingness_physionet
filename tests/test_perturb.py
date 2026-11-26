@@ -73,3 +73,27 @@ def test_planted_rule_only_removes_and_links_mask_to_outcome(records):
     assert abs(kept(same, 1) - kept(same, 0)) < 0.15  # control: no link
     for r, r0 in zip(on, records, strict=True):  # other variables untouched
         np.testing.assert_array_equal(np.isnan(r.values[:, 1:]), np.isnan(r0.values[:, 1:]))
+
+
+def test_whole_busy_hours_empty_busy_hours_and_reach_more(records):
+    from missingness.perturb.removal import busy_hour_candidates
+
+    p = 0.3
+    rand, state, achieved = paired_removal(records, p=p, seed=0, whole_hours=True)
+    _, _, achieved_extras = paired_removal(records, p=p, seed=0)
+    check_only_removed(records, rand)
+    check_only_removed(records, state)
+    assert achieved >= achieved_extras  # whole hours give more candidates than the extras
+    rng = np.random.default_rng(0)
+    for o, r, s in zip(records, rand, state, strict=True):
+        obs = ~np.isnan(o.values)
+        counts = obs.sum(axis=1)
+        busy = counts > int(np.floor(np.median(counts)))
+        gone = obs & np.isnan(s.values)
+        assert not gone[~busy].any()  # only busy hours lose values
+        touched = gone.any(axis=1)
+        partial = touched & (gone.sum(axis=1) < counts)
+        assert partial.sum() <= 1  # whole hours, except at most the last one taken
+        removed_r = (obs & np.isnan(r.values)).sum(axis=0)
+        np.testing.assert_array_equal(removed_r, gone.sum(axis=0))  # matched per variable
+        assert len(busy_hour_candidates(o, rng)) == obs[busy].sum()

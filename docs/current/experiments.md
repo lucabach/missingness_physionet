@@ -86,3 +86,20 @@ sepsis GRU 11 s per epoch, mortality GRU about 4 s; loading the sepsis data 36 s
 sepsis test set 13 s. Every GRU run fits on a laptop: the 104 GRU runs of week 2 and their
 standard evaluation take roughly 7 hours of one chain (two chains in parallel slow each
 other down 2–3x); `scripts/measures.py` takes about 20 minutes per model.
+
+## Predictive performance across seeds
+
+After the Week 3 runs, `python scripts/select_predictor.py mortality` (or `sepsis`) compares
+the six full-input checkpoints, the two within-model seed averages, and mixtures that give
+GRU-D 25%, 50%, or 75% of the weight. Each member predicts a probability. Selection maximizes
+validation AUROC over stays for mortality and over pre-onset hours at hospital 1 for sepsis.
+The selected mixture is fixed for all test hospitals. Its report in
+`results/predictor_<task>.json` includes a paired patient-bootstrap interval for the test AUROC
+gain over the individual checkpoint selected on the same validation set.
+
+To predict on additional records with the saved checkpoints, pass the report to
+`missingness.models.predictor.load_predictor`. It returns a model and normalizer for the
+usual `missingness.experiment.predict` interface. Move the model to the prediction device first.
+
+The first mortality sweep configuration (hidden size 64, batch size 64) took about 2 seconds
+per epoch for GRU-D and 2–3 seconds for ODE-RNN on the Week 3 laptop CPU, including validation.

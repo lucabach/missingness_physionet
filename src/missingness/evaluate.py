@@ -2,10 +2,13 @@
 
     python -m missingness.evaluate outputs/<run> --perturb random --p 0.10
     python -m missingness.evaluate outputs/<run> --perturb random state --p 0.05 0.10 0.15
+    python -m missingness.evaluate outputs/<run> --perturb random_hours state_hours --p 0.2 0.25 0.3
     python -m missingness.evaluate outputs/<run> --perturb thin --seed 0 1 2   # sepsis only
     python -m missingness.evaluate outputs/<run> --perturb planted_off         # E5 runs only
 
 ``random`` and ``state`` remove the same number of values per patient (paired_removal).
+``random_hours`` and ``state_hours`` do the same with whole busy hours as the state-dependent
+candidates (D27); random removal is again matched per variable.
 Random removal takes the same count per variable as state-dependent removal (D16).
 ``thin`` thins test_hospital1 to the measurement rates of test_hospital2.
 ``planted_off`` (runs trained with a ``planted`` rule, E5): the rule switched off, i.e. the
@@ -29,7 +32,13 @@ import yaml
 
 from missingness.data.preprocessing import Normalizer
 from missingness.data.records import PatientRecord
-from missingness.experiment import load_data, predict, score_predictions, with_planted
+from missingness.experiment import (
+    load_data,
+    predict,
+    score_predictions,
+    with_pattern_drop,
+    with_planted,
+)
 from missingness.models import build_model
 from missingness.perturb import (
     check_only_removed,
@@ -41,7 +50,8 @@ from missingness.perturb import (
 from missingness.perturb.planted import planted_index
 from missingness.utils import get_device
 
-PERTURBS = ("random", "state", "thin", "planted_off")
+PERTURBS = ("random", "state", "random_hours", "state_hours", "thin", "planted_off")
+REMOVAL_PERTURBS = ("random", "state", "random_hours", "state_hours")
 
 
 def result_tag(perturb: str, p: float | None, seed: int) -> str:
@@ -85,11 +95,13 @@ def perturb_sets(
         return {"test_hospital1_thinned": thinned}, extra
     out = {}
     cache = {} if cache is None else cache
+    whole_hours = perturb.endswith("_hours")
     for name, records in tests.items():
-        if (name, p, seed) not in cache:
-            cache[(name, p, seed)] = paired_removal(records, p, seed=seed)
-        rand, state, achieved = cache[(name, p, seed)]
-        chosen = rand if perturb == "random" else state
+        key = (name, p, seed, whole_hours)
+        if key not in cache:
+            cache[key] = paired_removal(records, p, seed=seed, whole_hours=whole_hours)
+        rand, state, achieved = cache[key]
+        chosen = rand if perturb.startswith("random") else state
         check_only_removed(records, chosen)
         out[name] = chosen
         extra[f"{name}/achieved_fraction"] = achieved
@@ -111,7 +123,7 @@ def evaluate_run(
     norm = Normalizer.from_dict(json.loads((run_dir / "normalizer.json").read_text()))
     model = build_model(cfg["model"], len(norm.mean), len(norm.static_mean), cfg["inputs"])
     model.load_state_dict(torch.load(run_dir / "model.pt", map_location=device, weights_only=True))
-    model.to(device)
+    model = with_pattern_drop(model.to(device), cfg)
 
     # One load. For E5 runs, ``clean`` is without the planted rule (for planted_off) and
     # ``tests`` with it, rebuilt exactly as in training.
@@ -151,7 +163,7 @@ def main() -> None:
     args = ap.parse_args()
     jobs = []
     for perturb in args.perturb:
-        ps = args.p if perturb in ("random", "state") else [None]
+        ps = args.p if perturb in REMOVAL_PERTURBS else [None]
         jobs += [(perturb, p, s) for p in ps for s in args.seed]
     evaluate_run(args.run_dir, jobs, force=args.force)
 

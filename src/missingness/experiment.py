@@ -70,6 +70,36 @@ def with_planted(cfg: dict, sets: dict[str, list[PatientRecord]]) -> dict[str, l
     return out
 
 
+def with_pattern_drop(model: nn.Module, cfg: dict) -> nn.Module:
+    """Hide the measurement pattern of the variables in ``cfg['pattern_drop']`` from the model.
+
+    Label-construction check (SOFA): the model keeps the forward-filled values of these
+    variables but sees their mask as always 1 and their time gaps as 0, a constant that carries
+    no timing. This is an input ablation like ``inputs=values``, not a perturbation of the
+    data: the records and the derived m and delta are unchanged. Applied as a forward
+    pre-hook, so checkpoints keep the plain model's keys.
+    """
+    names = cfg.get("pattern_drop")
+    if not names:
+        return model
+    variables = list(cfg["data"].get("variables") or [])
+    unknown = [v for v in names if v not in variables]
+    if unknown:
+        raise KeyError(f"pattern_drop: unknown variables {unknown}")
+    idx = torch.tensor([variables.index(v) for v in names])
+
+    def hook(module: nn.Module, args: tuple) -> tuple:
+        batch = dict(args[0])
+        m, delta = batch["m"].clone(), batch["delta"].clone()
+        m[..., idx.to(m.device)] = 1.0
+        delta[..., idx.to(delta.device)] = 0.0
+        batch.update(m=m, delta=delta)
+        return (batch, *args[1:])
+
+    model.register_forward_pre_hook(hook)
+    return model
+
+
 def make_loader(
     records: list[PatientRecord], norm: Normalizer, task: str, batch_size: int, shuffle: bool
 ) -> DataLoader:

@@ -39,6 +39,11 @@ def _parse_override(item: str) -> tuple[list[str], Any]:
 def load_config(experiment: str | Path, overrides: list[str] | None = None) -> dict:
     """Load an experiment YAML and merge its data/model configs and CLI overrides."""
     exp = yaml.safe_load(Path(experiment).read_text())
+    parsed = [_parse_override(item) for item in overrides or []]
+    # Selecting a different architecture also selects its defaults (e.g. in smoke runs).
+    for keys, value in parsed:
+        if keys == ["model", "name"] and isinstance(exp.get("model"), str):
+            exp["model"] = value
     cfg: dict = {}
     for kind in ("data", "model"):
         name = exp.get(kind)
@@ -48,7 +53,7 @@ def load_config(experiment: str | Path, overrides: list[str] | None = None) -> d
             exp = {k: v for k, v in exp.items() if k != kind}
     cfg = _deep_update(cfg, exp)
     tuned = [(k.split("."), v) for k, v in (cfg.get("tuned") or {}).items()]
-    for keys, value in tuned + [_parse_override(item) for item in overrides or []]:
+    for keys, value in tuned + parsed:
         node = cfg
         for k in keys[:-1]:
             node = node.setdefault(k, {})

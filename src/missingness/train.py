@@ -22,7 +22,14 @@ from torch import nn
 from missingness.config import load_config, save_config
 from missingness.data.preprocessing import Normalizer
 from missingness.eval.metrics import auroc
-from missingness.experiment import load_data, make_loader, predict, score_predictions, to_device
+from missingness.experiment import (
+    load_data,
+    make_loader,
+    predict,
+    score_predictions,
+    to_device,
+    with_pattern_drop,
+)
 from missingness.models import build_model
 from missingness.paths import OUTPUT_DIR
 from missingness.utils import get_device, git_commit, set_seed
@@ -41,11 +48,18 @@ def planted_tag(cfg: dict) -> str:
     return f"_planted{pl['variable']}{q1}-s{pl['q1'] / pl['q0']:.3g}"
 
 
+def pattern_drop_tag(cfg: dict) -> str:
+    """'' for a normal run; '_nopattern-<tag>' when the SOFA check hides some variables' pattern."""
+    if not cfg.get("pattern_drop"):
+        return ""
+    return f"_nopattern-{cfg.get('pattern_drop_tag') or '-'.join(cfg['pattern_drop'])}"
+
+
 def run_name(cfg: dict) -> str:
-    """outputs/<run_name>: data tag, model, inputs, planted rule (E5 only), seed."""
+    """outputs/<run_name>: data tag, model, inputs, planted rule (E5), hidden pattern, seed."""
     return cfg.get("run_name") or (
         f"{cfg['data'].get('tag', cfg['data']['name'])}_{cfg['model']['name']}"
-        f"_{cfg['inputs']}{planted_tag(cfg)}_seed{cfg['seed']}"
+        f"_{cfg['inputs']}{planted_tag(cfg)}{pattern_drop_tag(cfg)}_seed{cfg['seed']}"
     )
 
 
@@ -65,6 +79,7 @@ def train(cfg: dict) -> dict:
     n_vars, n_static = len(norm.mean), len(norm.static_mean)
 
     model = build_model(cfg["model"], n_vars, n_static, cfg["inputs"]).to(device)
+    model = with_pattern_drop(model, cfg)
     opt = torch.optim.Adam(model.parameters(), lr=tcfg["lr"], weight_decay=tcfg["weight_decay"])
     loss_fn = nn.BCEWithLogitsLoss(reduction="none")
     train_loader = make_loader(sets["train"], norm, task, tcfg["batch_size"], shuffle=True)

@@ -1,0 +1,123 @@
+{
+  "weights": {
+    "physionet2019_grud_all_seed0": 0.16666666666666666,
+    "physionet2019_grud_all_seed1": 0.16666666666666666,
+    "physionet2019_grud_all_seed2": 0.16666666666666666,
+    "physionet2019_odernn_all_seed0": 0.16666666666666666,
+    "physionet2019_odernn_all_seed1": 0.16666666666666666,
+    "physionet2019_odernn_all_seed2": 0.16666666666666666
+  },
+  "selection": "grud_fraction_0.5",
+  "validation_auroc": {
+    "single_0": 0.7307315226278976,
+    "single_1": 0.7290301599796079,
+    "single_2": 0.7154863674991139,
+    "single_3": 0.7210152725817054,
+    "single_4": 0.729824123793865,
+    "single_5": 0.7146699012867697,
+    "grud_fraction_0": 0.7290698705722567,
+    "grud_fraction_0.25": 0.7335228772049259,
+    "grud_fraction_0.5": 0.7349095763049731,
+    "grud_fraction_0.75": 0.7338383661935031,
+    "grud_fraction_1": 0.7295473207133835
+  },
+  "checkpoint_order": [
+    "physionet2019_grud_all_seed0",
+    "physionet2019_grud_all_seed1",
+    "physionet2019_grud_all_seed2",
+    "physionet2019_odernn_all_seed0",
+    "physionet2019_odernn_all_seed1",
+    "physionet2019_odernn_all_seed2"
+  ],
+  "best_individual": "single_0",
+  "test": {
+    "test_hospital1": {
+      "all/auroc": {
+        "value": 0.7788707409011671,
+        "lo": 0.7520521244722503,
+        "hi": 0.8089597627080853,
+        "n_boot": 1000
+      },
+      "all/auprc": {
+        "value": 0.046294996525604294,
+        "lo": 0.03628296908641854,
+        "hi": 0.06216220072222539,
+        "n_boot": 1000
+      },
+      "pre_onset/auroc": {
+        "value": 0.7713368713632148,
+        "lo": 0.7440589284807138,
+        "hi": 0.8013778370907242,
+        "n_boot": 1000
+      },
+      "pre_onset/auprc": {
+        "value": 0.025702179354491546,
+        "lo": 0.020704545962453042,
+        "hi": 0.03394218201815588,
+        "n_boot": 1000
+      },
+      "pre_onset_excl_positive_at_start/auroc": {
+        "value": 0.7629798723212732,
+        "lo": 0.7317319592461272,
+        "hi": 0.793330982703026,
+        "n_boot": 1000
+      },
+      "pre_onset_excl_positive_at_start/auprc": {
+        "value": 0.021281412400965524,
+        "lo": 0.01649500542134194,
+        "hi": 0.02928127503136989,
+        "n_boot": 1000
+      },
+      "headline_gain_vs_best_individual": {
+        "value": 0.011541881336796012,
+        "lo": -0.001050345966469729,
+        "hi": 0.021578175004268126,
+        "n_boot": 1000
+      }
+    },
+    "test_hospital2": {
+      "all/auroc": {
+        "value": 0.744485436052038,
+        "lo": 0.7092991955897517,
+        "hi": 0.7839389019626152,
+        "n_boot": 1000
+      },
+      "all/auprc": {
+        "value": 0.03370571846451813,
+        "lo": 0.024610333831446767,
+        "hi": 0.049543103484981296,
+        "n_boot": 1000
+      },
+      "pre_onset/auroc": {
+        "value": 0.7286982617226107,
+        "lo": 0.6928081048940545,
+        "hi": 0.7672248273158678,
+        "n_boot": 1000
+      },
+      "pre_onset/auprc": {
+        "value": 0.018168049329891744,
+        "lo": 0.013718897599528669,
+        "hi": 0.025429228748168817,
+        "n_boot": 1000
+      },
+      "pre_onset_excl_positive_at_start/auroc": {
+        "value": 0.728485853628236,
+        "lo": 0.6744635041293486,
+        "hi": 0.7820374624176761,
+        "n_boot": 1000
+      },
+      "pre_onset_excl_positive_at_start/auprc": {
+        "value": 0.013165650033033436,
+        "lo": 0.008814556252884149,
+        "hi": 0.021118659008632065,
+        "n_boot": 1000
+      },
+      "headline_gain_vs_best_individual": {
+        "value": 0.026053103499412145,
+        "lo": -0.006628583223245515,
+        "hi": 0.062176181517650676,
+        "n_boot": 1000
+      }
+    }
+  }
+}
