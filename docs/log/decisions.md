@@ -47,3 +47,4 @@ redesigned (Matteo) · D21 is superseded in part by D24.
 - **Q4:** resolved by D16 and D17 (17 Nov). D5 stays the state-dependent rule.
 - **Q5 (week 3):** resolved by D25 and D26.
 - **Q7–Q9:** resolved by D20–D22 (18 Nov).
+- **Q10 (26 Nov, results meeting with Sarah):** open items P1–P4 (Parthiv), L1–L3 (Luca) and T1–T4 in `docs/log/ta_feedback.md` → "Results meeting, 26 Nov 2026". Training on thinned data (P2), a pattern-free values model (L1) and removal above 30% (L2) change results and need a D-number before runs.
