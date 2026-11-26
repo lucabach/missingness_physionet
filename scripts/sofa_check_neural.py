@@ -7,7 +7,7 @@ hidden, and compare with hiding the pattern of five randomly chosen other variab
 five draws as gradient boosting). The values of the hidden variables stay in the inputs.
 
     python scripts/sofa_check_neural.py --print-commands | xargs -d '\n' -P 4 -n 1 bash -c  # train
-    python scripts/sofa_check_neural.py                   # -> results/sofa_check_neural.csv
+    python scripts/sofa_check_neural.py   # -> results/sofa_check_neural/sofa_check_neural.csv
 
 Loss = AUROC(nothing hidden) - AUROC(pattern hidden), mean over seeds 0-2, 95% interval from
 the paired patient bootstrap (every draw scores every model and seed on the same patients).
@@ -148,7 +148,7 @@ def main() -> None:
     if args.print_commands:
         print("\n".join(commands()))
         return
-    out = REPO_ROOT / "results" / "sofa_check_neural.csv"
+    out = REPO_ROOT / "results" / "sofa_check_neural" / "sofa_check_neural.csv"
     table(args.n_boot).to_csv(out, index=False)
     print(f"-> {out}")
 
