@@ -97,3 +97,28 @@ def test_time_dynamics_receive_training_gradients(name):
     for param in params:
         assert param.grad is not None and torch.isfinite(param.grad).all()
         assert param.grad.abs().sum() > 0
+
+
+@pytest.mark.parametrize("name", sorted(MODELS))
+def test_pattern_drop_hides_the_pattern_of_the_named_variables_only(name):
+    """SOFA check: with pattern_drop, the mask and gaps of the named variables no longer matter;
+    those of the other variables still do."""
+    from missingness.experiment import with_pattern_drop
+
+    torch.manual_seed(0)
+    records = make_synthetic(n_patients=8, task="hourly", seed=0)
+    batch = _batch(records)
+    n_vars, n_static = batch["x"].shape[-1], batch["static"].shape[-1]
+    cfg = {"pattern_drop": ["v0"], "data": {"variables": [f"v{d}" for d in range(n_vars)]}}
+    model = with_pattern_drop(build_model(_cfg(name), n_vars, n_static, "all"), cfg).eval()
+
+    def changed(d: int) -> bool:
+        other = dict(batch)
+        other["m"], other["delta"] = batch["m"].clone(), batch["delta"].clone()
+        other["m"][..., d] = 1 - other["m"][..., d]
+        other["delta"][..., d] = other["delta"][..., d] + 3.0
+        with torch.no_grad():
+            return not torch.allclose(model(batch), model(other))
+
+    assert not changed(0)
+    assert changed(1)

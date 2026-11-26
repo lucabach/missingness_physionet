@@ -32,7 +32,13 @@ import yaml
 
 from missingness.data.preprocessing import Normalizer
 from missingness.data.records import PatientRecord
-from missingness.experiment import load_data, predict, score_predictions, with_planted
+from missingness.experiment import (
+    load_data,
+    predict,
+    score_predictions,
+    with_pattern_drop,
+    with_planted,
+)
 from missingness.models import build_model
 from missingness.perturb import (
     check_only_removed,
@@ -117,7 +123,7 @@ def evaluate_run(
     norm = Normalizer.from_dict(json.loads((run_dir / "normalizer.json").read_text()))
     model = build_model(cfg["model"], len(norm.mean), len(norm.static_mean), cfg["inputs"])
     model.load_state_dict(torch.load(run_dir / "model.pt", map_location=device, weights_only=True))
-    model.to(device)
+    model = with_pattern_drop(model.to(device), cfg)
 
     # One load. For E5 runs, ``clean`` is without the planted rule (for planted_off) and
     # ``tests`` with it, rebuilt exactly as in training.
