@@ -7,7 +7,8 @@
 One row per run, test set, subset and metric; tuning runs (``tune_*``) have one row with
 ``test_set = none`` that carries their validation AUROC. Clean test sets come from
 ``outputs/<run>/metrics.json``; perturbed ones from ``outputs/<run>/perturbed/*.json``
-(column ``perturb``: ``none``, ``random_p0.1``, ``state_p0.1``, ``thin`` ...).
+(column ``perturb``: ``none``, ``random_p0.1``, ``state_p0.1``, ``thin``,
+``state_p0.1_chpattern`` ...; column ``view``: the run's input view, D29).
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ def run_info(cfg: dict, run_dir: Path) -> dict:
     """Columns that say which run a row belongs to (enough to group runs without the name)."""
     info = {"run": run_dir.name} | {k: _get(cfg, p) for k, p in RUN_KEYS.items()}
     info["data_tag"] = info["data_tag"] or info["dataset"]
+    info["view"] = cfg.get("features", "forward_fill")  # D29: forward_fill, snapshot, decoded
     info["n_vars"] = len(_get(cfg, ("data", "variables")) or [])
     pl = cfg.get("planted") or {}
     info["planted_variable"] = pl.get("variable")
@@ -93,6 +95,8 @@ def collect(outputs: Path, models: list[str] | None = None) -> pd.DataFrame:
             tag = res.get("perturb", "?")
             if tag not in ("thin", "planted_off"):
                 tag = f"{tag}_p{res.get('p')}"
+            if res.get("channel"):  # channel intervention (D29)
+                tag = f"{tag}_ch{res['channel']}"
             sources.append((f"{tag}_seed{res.get('seed', 0)}", res))
         n_before = len(rows)
         for perturb, metrics in sources:

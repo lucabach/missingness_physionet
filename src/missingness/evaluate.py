@@ -5,6 +5,7 @@
     python -m missingness.evaluate outputs/<run> --perturb random_hours state_hours --p 0.2 0.25 0.3
     python -m missingness.evaluate outputs/<run> --perturb thin --seed 0 1 2   # sepsis only
     python -m missingness.evaluate outputs/<run> --perturb planted_off         # E5 runs only
+    python -m missingness.evaluate outputs/<run> --perturb random state --channel pattern
 
 ``random`` and ``state`` remove the same number of values per patient (paired_removal).
 ``random_hours`` and ``state_hours`` do the same with whole busy hours as the state-dependent
@@ -19,6 +20,12 @@ of the data and the model. Each writes outputs/<run>/perturbed/<tag>_seed<seed>.
 predictions next to it, in perturbed/<tag>_seed<seed>/<test set>.parquet (the paired
 measures M2 and M4 are computed from these). Existing results are skipped unless --force.
 The standard evaluation of every run is ``scripts/evaluate_runs.py``.
+
+``--channel`` (channel intervention, D29 proposed; `all` runs only) feeds the model mixed
+inputs: ``pattern`` keeps x from the clean test set and takes m and delta from the perturbed
+one, so the model meets the new pattern without losing any value; ``values`` does the
+opposite. Tags get ``_ch<channel>``, e.g. ``state_p0.1_chpattern_seed0``. Runs trained on
+another view (``features: snapshot`` or ``decoded``) are evaluated in that same view.
 """
 
 from __future__ import annotations
@@ -32,6 +39,7 @@ import yaml
 
 from missingness.data.preprocessing import Normalizer
 from missingness.data.records import PatientRecord
+from missingness.data.views import feature_kwargs
 from missingness.experiment import (
     load_data,
     predict,
@@ -52,12 +60,20 @@ from missingness.utils import get_device
 
 PERTURBS = ("random", "state", "random_hours", "state_hours", "thin", "planted_off")
 REMOVAL_PERTURBS = ("random", "state", "random_hours", "state_hours")
+CHANNELS = ("pattern", "values")
 
 
-def result_tag(perturb: str, p: float | None, seed: int) -> str:
-    """File stem of one evaluation, e.g. ``state_p0.1_seed0`` or ``thin_seed2``."""
+def result_tag(perturb: str, p: float | None, seed: int, channel: str | None = None) -> str:
+    """File stem of one evaluation, e.g. ``state_p0.1_seed0``, ``thin_seed2`` or
+    ``state_p0.1_chpattern_seed0`` (channel intervention)."""
     base = perturb if perturb in ("thin", "planted_off") else f"{perturb}_p{p}"
-    return f"{base}_seed{seed}"
+    ch = f"_ch{channel}" if channel else ""
+    return f"{base}{ch}_seed{seed}"
+
+
+def clean_name(perturbed_name: str) -> str:
+    """Test set a perturbed set was made from (``test_hospital1_thinned`` -> ``test_hospital1``)."""
+    return perturbed_name.removesuffix("_thinned")
 
 
 def perturb_sets(
@@ -109,15 +125,31 @@ def perturb_sets(
 
 
 def evaluate_run(
-    run_dir: Path, jobs: list[tuple[str, float | None, int]], force: bool = False
+    run_dir: Path,
+    jobs: list[tuple[str, float | None, int]],
+    force: bool = False,
+    channel: str | None = None,
 ) -> list[Path]:
-    """Evaluate one trained run under each (perturb, p, seed) in ``jobs``; return the files."""
-    todo = [
-        j for j in jobs if force or not (run_dir / "perturbed" / f"{result_tag(*j)}.json").exists()
-    ]
+    """Evaluate one trained run under each (perturb, p, seed) in ``jobs``; return the files.
+
+    ``channel`` (``pattern`` or ``values``): channel intervention, see the module docstring.
+    """
+
+    def tag(job: tuple) -> str:
+        return result_tag(*job, channel=channel)
+
+    todo = [j for j in jobs if force or not (run_dir / "perturbed" / f"{tag(j)}.json").exists()]
     if not todo:
         return []
     cfg = yaml.safe_load((run_dir / "config.yaml").read_text())
+    if channel is not None:
+        if channel not in CHANNELS:
+            raise SystemExit(f"--channel must be one of {CHANNELS}")
+        if cfg["inputs"] != "all":
+            raise SystemExit("--channel needs a run with inputs=all (values and pattern inputs)")
+        if any(perturb == "planted_off" for perturb, _, _ in todo):
+            raise SystemExit("--channel is not defined for planted_off")
+    features = feature_kwargs(cfg)
     task = cfg["data"]["task"]
     device = get_device()
     norm = Normalizer.from_dict(json.loads((run_dir / "normalizer.json").read_text()))
@@ -139,14 +171,22 @@ def evaluate_run(
         sets, results = perturb_sets(
             cfg, tests, clean if planted else None, perturb, p, seed, cache
         )
-        results = {"perturb": perturb, "p": p, "seed": seed} | results
-        pred_dir = run_dir / "perturbed" / result_tag(perturb, p, seed)
+        results = {"perturb": perturb, "p": p, "seed": seed, "channel": channel} | results
+        pred_dir = run_dir / "perturbed" / tag((perturb, p, seed))
         pred_dir.mkdir(parents=True, exist_ok=True)
         for name, records in sets.items():
-            pred = predict(model, records, norm, task, device)
+            x_records, pattern_records = records, None
+            if channel == "pattern":  # clean values, perturbed pattern
+                x_records, pattern_records = tests[clean_name(name)], records
+            elif channel == "values":  # perturbed values, clean pattern
+                pattern_records = tests[clean_name(name)]
+            pred = predict(
+                model, x_records, norm, task, device, features=features,
+                pattern_records=pattern_records,
+            )  # fmt: skip
             pred.to_parquet(pred_dir / f"{name}.parquet", index=False)
             results[name] = score_predictions(pred, task, n_boot=cfg["eval"]["n_boot"])
-        out = run_dir / "perturbed" / f"{result_tag(perturb, p, seed)}.json"
+        out = run_dir / "perturbed" / f"{tag((perturb, p, seed))}.json"
         out.write_text(json.dumps(results, indent=2))
         print(f"done -> {out}")
         written.append(out)
@@ -160,12 +200,15 @@ def main() -> None:
     ap.add_argument("--p", type=float, nargs="+", default=[0.10], help="fractions removed, D17")
     ap.add_argument("--seed", type=int, nargs="+", default=[0])
     ap.add_argument("--force", action="store_true", help="redo evaluations that exist")
+    ap.add_argument(
+        "--channel", choices=CHANNELS, help="channel intervention on an `all` run (D29)"
+    )
     args = ap.parse_args()
     jobs = []
     for perturb in args.perturb:
         ps = args.p if perturb in REMOVAL_PERTURBS else [None]
         jobs += [(perturb, p, s) for p in ps for s in args.seed]
-    evaluate_run(args.run_dir, jobs, force=args.force)
+    evaluate_run(args.run_dir, jobs, force=args.force, channel=args.channel)
 
 
 if __name__ == "__main__":

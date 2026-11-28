@@ -326,6 +326,11 @@ def main() -> None:
     measures = pd.read_csv(RESULTS / "measures.csv")
     r = runs[(runs.model == args.model) & (runs.metric == "auroc") & ~runs.tuning.astype(bool)]
     m = measures[measures.model == args.model]
+    # The figures show the forward-fill runs; the D29 views have their own rows.
+    if "view" in r:
+        r = r[r.view.fillna("forward_fill") == "forward_fill"]
+    if "view" in m:
+        m = m[m.view.fillna("forward_fill") == "forward_fill"]
     if r.empty or m.empty:
         raise SystemExit(f"no rows for {args.model} in results/runs.csv or results/measures.csv")
     name = NAMES[args.model]

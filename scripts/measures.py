@@ -23,6 +23,20 @@ Measures (AUROC differences; a positive value means what the name says):
 - M4 transfer: (hospital 1 − hospital 2) for all minus the same for values; the two test sets
   are independent samples, so their bootstrap draws are resampled separately.
 
+RQ2 redesign (D29, proposed). Runs trained on another view (``features: snapshot`` or
+``decoded``) are kept apart (column ``view``); for the snapshot view, M1 is the built-in check
+(all and values see the same common schedule, so it should be about 0). Across views:
+
+- M1_decoded_gap: pattern model on the true m and delta − pattern model on m and delta rebuilt
+  from forward-filled x (leak audit). Near 0 means a values-only model can read the pattern.
+- M1_bound_snapshot: forward-fill all − snapshot values, the upper end of the Δmask bound
+  (the lower end is M1 with forward fill).
+- M2_ref_snapshot, M4_thinning_ref_snapshot: M2 and M4 with the snapshot values model as the
+  reference instead of the forward-fill values model.
+- M2_channel_pattern / M2_channel_values: (random − state) for the forward-fill all model
+  when only its pattern inputs (or only its values) come from the removed data;
+  M4_thinning_channel_pattern / _values: recorded − thinned in the same way.
+
 Only runs with the same seeds for all variants of a measure are combined. Rows of all
 prediction files of a measure must match (same patients, hours, labels); this is checked.
 """
@@ -63,6 +77,7 @@ def runs_index(outputs: Path, models: list[str] | None) -> pd.DataFrame:
                 "task": cfg["data"]["task"],
                 "model": cfg["model"]["name"],
                 "inputs": cfg["inputs"],
+                "view": cfg.get("features", "forward_fill"),
                 "seed": cfg["seed"],
                 "strength": round(pl["q1"] / pl["q0"], 3) if pl else None,
                 "q1": pl.get("q1"),
@@ -136,6 +151,81 @@ def m3_rows(paths: dict, key: dict, ts: str, task: str, add) -> None:
                 [1, -1, -1, 1], task)  # fmt: skip
 
 
+def m2_m4_rows(name: str, key: dict, a: list, v: list, test_sets: list, task: str, add) -> None:
+    """M2 at p 0.05-0.15 and M4 thinning with run lists ``a`` (all) and ``v`` (reference)."""
+    for p in (0.05, 0.1, 0.15):
+        for ts in test_sets:
+            tags = [f"random_p{p}_seed0", f"state_p{p}_seed0"]
+            groups = [[load_pred(r, ts, t) for r in runs] for runs in (a, v) for t in tags]
+            if not any(f is None for grp in groups for f in grp):
+                add(f"M2_{name}", key, f"p={p}", ts, groups, [1, -1, -1, 1], task)
+    if "test_hospital2" in test_sets:
+        thin = [f"thin_seed{t}" for t in (0, 1, 2)]
+        groups = []
+        for runs in (a, v):
+            groups += [
+                [load_pred(r, "test_hospital1") for r in runs for _ in thin],
+                [load_pred(r, "test_hospital1_thinned", t) for r in runs for t in thin],
+            ]
+        if not any(f is None for grp in groups for f in grp):
+            add(f"M4_thinning_{name}", key, "", "test_hospital1", groups, [1, -1, -1, 1], task)
+
+
+def paired_runs(g: pd.DataFrame, first: tuple, second: tuple) -> tuple[list, list]:
+    """Run folders of two (view, inputs) variants for the seeds both have."""
+    sel = [
+        g[(g["view"] == view) & (g["inputs"] == inp)].set_index("seed")["path"]
+        for view, inp in (first, second)
+    ]
+    seeds = sorted(set(sel[0].index) & set(sel[1].index))
+    return [sel[0][s] for s in seeds], [sel[1][s] for s in seeds]
+
+
+def cross_view_rows(plain: pd.DataFrame, add) -> None:
+    """Comparisons across views (D29): decoded pattern, snapshot bound and reference."""
+    for (data_tag, model, task), g in plain.groupby(["data_tag", "model", "task"]):
+        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model, "view": "cross"}
+        pairs = (
+            ("M1_decoded_gap", ("forward_fill", "pattern"), ("decoded", "pattern")),
+            ("M1_bound_snapshot", ("forward_fill", "all"), ("snapshot", "values")),
+        )
+        for name, first, second in pairs:
+            a, b = paired_runs(g, first, second)
+            if not a:
+                continue
+            test_sets = [f.stem for f in sorted((a[0] / "predictions").glob("*.parquet"))]
+            for ts in test_sets:
+                groups = [[load_pred(r, ts) for r in a], [load_pred(r, ts) for r in b]]
+                add(name, key, "", ts, groups, [1, -1], task)
+            if name == "M1_bound_snapshot":
+                m2_m4_rows("ref_snapshot", key, a, b, test_sets, task, add)
+
+
+def channel_rows(plain: pd.DataFrame, add) -> None:
+    """Channel intervention (D29) on the forward-fill all runs."""
+    sel = plain[(plain["view"] == "forward_fill") & (plain["inputs"] == "all")]
+    for (data_tag, model, task), g in sel.groupby(["data_tag", "model", "task"]):
+        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model, "view": "channel"}
+        runs = list(g.sort_values("seed")["path"])
+        test_sets = [f.stem for f in sorted((runs[0] / "predictions").glob("*.parquet"))]
+        for ch in ("pattern", "values"):
+            for p in (0.05, 0.1, 0.15):
+                for ts in test_sets:
+                    tags = [f"random_p{p}_ch{ch}_seed0", f"state_p{p}_ch{ch}_seed0"]
+                    groups = [[load_pred(r, ts, t) for r in runs] for t in tags]
+                    if not any(f is None for grp in groups for f in grp):
+                        add(f"M2_channel_{ch}", key, f"p={p}", ts, groups, [1, -1], task)
+            if "test_hospital2" in test_sets:
+                thin = [f"thin_ch{ch}_seed{t}" for t in (0, 1, 2)]
+                groups = [
+                    [load_pred(r, "test_hospital1") for r in runs for _ in thin],
+                    [load_pred(r, "test_hospital1_thinned", t) for r in runs for t in thin],
+                ]
+                if not any(f is None for grp in groups for f in grp):
+                    add(f"M4_thinning_channel_{ch}", key, "", "test_hospital1", groups,
+                        [1, -1], task)  # fmt: skip
+
+
 def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dict]:
     rows = []
 
@@ -153,8 +243,8 @@ def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dic
             )
 
     plain = idx[idx["strength"].isna()]
-    for (data_tag, model, task), g in plain.groupby(["data_tag", "model", "task"]):
-        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model}
+    for (data_tag, model, task, view), g in plain.groupby(["data_tag", "model", "task", "view"]):
+        key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model, "view": view}
         by = {inp: d.set_index("seed")["path"] for inp, d in g.groupby("inputs")}
         if not {"all", "values"} <= set(by):
             continue
@@ -163,7 +253,7 @@ def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dic
             continue
         a, v = [by["all"][s] for s in seeds], [by["values"][s] for s in seeds]
         test_sets = [f.stem for f in sorted((a[0] / "predictions").glob("*.parquet"))]
-        print(f"{data_tag} {model}: seeds {seeds}")
+        print(f"{data_tag} {model} {view}: seeds {seeds}")
 
         for ts in test_sets:  # M1
             ga, gv = [load_pred(r, ts) for r in a], [load_pred(r, ts) for r in v]
@@ -218,6 +308,9 @@ def measure_rows(idx: pd.DataFrame, metrics: list[str], n_boot: int) -> list[dic
                     | {"value": round(r1["value"] - r2["value"], 4)}
                     | {"lo": round(float(lo), 4), "hi": round(float(hi), 4)}
                 )
+
+    cross_view_rows(plain, add)
+    channel_rows(plain, add)
 
     planted = idx[idx["strength"].notna()]  # M3, one design (q1) at a time: D21 q1 = 1, D24 0.8
     for (data_tag, model, task, q1), g in planted.groupby(["data_tag", "model", "task", "q1"]):

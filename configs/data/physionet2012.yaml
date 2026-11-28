@@ -6,3 +6,12 @@ variables: [Albumin, ALP, ALT, AST, Bilirubin, BUN, Cholesterol, Creatinine, Dia
             GCS, Glucose, HCO3, HCT, HR, K, Lactate, Mg, MAP, MechVent, Na, NIDiasABP, NIMAP,
             NISysABP, PaCO2, PaO2, pH, Platelets, RespRate, SaO2, SysABP, Temp, TroponinI,
             TroponinT, Urine, WBC, Weight]
+# Common-schedule ("snapshot") view for the RQ2 redesign (D29, proposed), see
+# configs/data/physionet2019.yaml. Widths should divide 48 so the last hour closes a bin.
+snapshot:
+  fast_width: 2         # hours, vital signs and bedside measurements
+  slow_width: 12        # hours, laboratory values
+  fast_variables: [DiasABP, FiO2, GCS, HR, MAP, MechVent, NIDiasABP, NIMAP, NISysABP,
+                   RespRate, SaO2, SysABP, Temp, Urine]
+  variable_widths: {}
+  min_coverage: 0.95

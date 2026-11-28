@@ -21,6 +21,7 @@ from torch import nn
 
 from missingness.config import load_config, save_config
 from missingness.data.preprocessing import Normalizer
+from missingness.data.views import feature_kwargs, feature_tag, resolve_snapshot
 from missingness.eval.metrics import auroc
 from missingness.experiment import (
     load_data,
@@ -56,10 +57,12 @@ def pattern_drop_tag(cfg: dict) -> str:
 
 
 def run_name(cfg: dict) -> str:
-    """outputs/<run_name>: data tag, model, inputs, planted rule (E5), hidden pattern, seed."""
+    """outputs/<run_name>: data tag, model, inputs, view (D29), planted rule (E5), hidden
+    pattern, seed."""
     return cfg.get("run_name") or (
         f"{cfg['data'].get('tag', cfg['data']['name'])}_{cfg['model']['name']}"
-        f"_{cfg['inputs']}{planted_tag(cfg)}{pattern_drop_tag(cfg)}_seed{cfg['seed']}"
+        f"_{cfg['inputs']}{feature_tag(cfg)}{planted_tag(cfg)}{pattern_drop_tag(cfg)}"
+        f"_seed{cfg['seed']}"
     )
 
 
@@ -74,6 +77,9 @@ def train(cfg: dict) -> dict:
     save_config(cfg, out_dir / "config.yaml")
 
     sets = load_data(cfg)
+    resolve_snapshot(cfg, sets["train"])  # snapshot view: widths from the training records
+    save_config(cfg, out_dir / "config.yaml")
+    features = feature_kwargs(cfg)
     norm = Normalizer.fit(sets["train"])
     (out_dir / "normalizer.json").write_text(json.dumps(norm.to_dict()))
     n_vars, n_static = len(norm.mean), len(norm.static_mean)
@@ -82,7 +88,9 @@ def train(cfg: dict) -> dict:
     model = with_pattern_drop(model, cfg)
     opt = torch.optim.Adam(model.parameters(), lr=tcfg["lr"], weight_decay=tcfg["weight_decay"])
     loss_fn = nn.BCEWithLogitsLoss(reduction="none")
-    train_loader = make_loader(sets["train"], norm, task, tcfg["batch_size"], shuffle=True)
+    train_loader = make_loader(
+        sets["train"], norm, task, tcfg["batch_size"], shuffle=True, features=features
+    )
 
     best, patience = -1.0, 0
     for epoch in range(tcfg["epochs"]):
@@ -97,7 +105,7 @@ def train(cfg: dict) -> dict:
             nn.utils.clip_grad_norm_(model.parameters(), tcfg["grad_clip"])
             opt.step()
             total += loss.item()
-        val = predict(model, sets["val"], norm, task, device)
+        val = predict(model, sets["val"], norm, task, device, features=features)
         val_auroc = auroc(val["label"], val["score"])
         print(
             f"epoch {epoch:3d}  loss {total / len(train_loader):.4f}  "
@@ -118,7 +126,7 @@ def train(cfg: dict) -> dict:
     for name, records in sets.items():
         if not name.startswith("test") or not cfg["eval"].get("test", True):
             continue
-        pred = predict(model, records, norm, task, device)
+        pred = predict(model, records, norm, task, device, features=features)
         pred.to_parquet(out_dir / "predictions" / f"{name}.parquet", index=False)
         metrics[name] = score_predictions(pred, task, n_boot=cfg["eval"]["n_boot"])
     (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))

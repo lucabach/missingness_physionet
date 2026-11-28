@@ -45,3 +45,14 @@ variables:
 # Variables that enter the SOFA score (Singer et al. 2016), for the label-construction check
 # (week 2). PaO2, GCS, urine output and vasopressors are not in PhysioNet 2019 (D13).
 sofa_variables: [MAP, Platelets, Bilirubin_total, Creatinine, FiO2]
+# Common-schedule ("snapshot") view for the RQ2 redesign (D29, proposed), used only with
+# `features=snapshot`. One value per variable per bin (the last), shown at the bin end; a
+# variable keeps its bin width only if >= min_coverage of the complete bins of the training
+# records hold a value, otherwise it is hidden. Widths per variable can be set in
+# variable_widths. Check the coverage first: python scripts/leak_audit.py --coverage
+snapshot:
+  fast_width: 2         # hours, vital signs
+  slow_width: 24        # hours, laboratory values
+  fast_variables: [HR, O2Sat, Temp, SBP, MAP, DBP, Resp, EtCO2]
+  variable_widths: {}   # e.g. {Temp: 4}
+  min_coverage: 0.95
