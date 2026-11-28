@@ -1,6 +1,6 @@
 # RQ2 redesign, mortality results (D29, proposed)
 
-28 Nov 2026. 54 runs on PhysioNet 2012 mortality (Silva et al. 2012; Goldberger et al. 2000):
+28 Nov 2026. 72 runs on PhysioNet 2012 mortality (Silva et al. 2012; Goldberger et al. 2000):
 GRU, GRU-D, ODE-RNN × {`all`, `values`, `pattern` with forward fill; `pattern` decoded;
 `values` and `all` snapshot} × seeds 0–2, with the tuned configurations. These were trained
 in the cloud container, not on the cluster, so the forward-fill rows here are a re-run of the
@@ -53,9 +53,18 @@ the paired patient bootstrap in `measures.csv`. For GRU-D the `values` variant i
    The snapshot reference therefore reacts differently to *information* loss, and that
    difference enters M2. The channel intervention (point 4) has no such reference problem.
 
+## Variant with 90% coverage (`snapshot-cov90`, 18 runs)
+
+With `min_coverage` 0.90 instead of 0.95 the snapshot keeps 12 of 37 variables (adds
+Glucose, K, Mg and Urine). It barely helps: the `values` snapshot reaches 0.777 (GRU), 0.778
+(GRU-D) and 0.775 (ODE-RNN), against 0.776–0.777 with 95% coverage. The check still holds
+(`all − values` in view `snapshot-cov90`: −0.000, +0.004, −0.002; all intervals include 0).
+The bound (about 0.09) and `M2_ref_snapshot-cov90` (+0.013 to +0.015 at p = 0.15) are
+unchanged. So the snapshot's information cost for mortality comes from the 4 h / 24 h bins,
+not from the coverage cut. A narrower bin would be the lever, not more variables.
+
 ## Still to come
 
-- `cov90` variant (min_coverage 0.90, more variables kept), 18 runs.
 - Sepsis (both hospitals, including thinning and M4), 54 runs.
 
 These will be added to this folder when they finish.
