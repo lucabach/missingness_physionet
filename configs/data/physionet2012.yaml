@@ -9,8 +9,8 @@ variables: [Albumin, ALP, ALT, AST, Bilirubin, BUN, Cholesterol, Creatinine, Dia
 # Common-schedule ("snapshot") view for the RQ2 redesign (D29, proposed), see
 # configs/data/physionet2019.yaml. Widths should divide 48 so the last hour closes a bin.
 snapshot:
-  fast_width: 2         # hours, vital signs and bedside measurements
-  slow_width: 12        # hours, laboratory values
+  fast_width: 4         # hours, vital signs and bedside measurements
+  slow_width: 24        # hours, laboratory values (12 h: no lab reaches 95% coverage)
   fast_variables: [DiasABP, FiO2, GCS, HR, MAP, MechVent, NIDiasABP, NIMAP, NISysABP,
                    RespRate, SaO2, SysABP, Temp, Urine]
   variable_widths: {}

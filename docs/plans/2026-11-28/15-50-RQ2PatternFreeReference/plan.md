@@ -69,8 +69,9 @@ information (Sarah's point about thinning).
 
 ## 4. Open before runs
 
-- Bin widths and `min_coverage` (step 1). Defaults in the configs: vitals 2 h; labs 12 h
-  (mortality) and 24 h (sepsis); 95%.
+- Bin widths and `min_coverage` (step 1): set 28 Nov from the coverage table to vitals 4 h,
+  labs 24 h, 95% (mortality keeps 8 of 37 variables, sepsis 14 of 34; `results/leak_audit/`).
+  Confirm with the group.
 - B edits model inputs at test time, as D28 did (invariant 1 holds for the records; the mixed
   batch is an input ablation). Confirm with the group.
 - L3 margin, needed for the gate in step 6.
