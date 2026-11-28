@@ -12,6 +12,11 @@ A batch is a dict of tensors, all padded to the longest stay in the batch:
 Every model therefore outputs one logit per time step, and the stay-level task (mortality)
 simply reads the logit at the last observed hour. Predictions at step t only use data up
 to t, as long as the model is causal (all our RNNs are).
+
+``features`` are the keyword arguments of ``preprocessing.featurize`` (the run's view, D29).
+``pattern_records`` (channel intervention, D29): the same patients with another set of
+observations; m and delta are then taken from them and x, static and labels from
+``records``. This is an input ablation for evaluation only, like ``pattern_drop`` (D28).
 """
 
 from __future__ import annotations
@@ -25,14 +30,31 @@ from missingness.data.records import PatientRecord
 
 
 class TimeSeriesDataset(Dataset):
-    def __init__(self, records: list[PatientRecord], norm: Normalizer, task: str):
+    def __init__(
+        self,
+        records: list[PatientRecord],
+        norm: Normalizer,
+        task: str,
+        features: dict | None = None,
+        pattern_records: list[PatientRecord] | None = None,
+    ):
         assert task in ("hourly", "stay"), task
         self.records = records
         self.task = task
-        self.items = [self._build(r, norm) for r in records]
+        self.features = features or {}
+        if pattern_records is None:
+            self.items = [self._build(r, norm) for r in records]
+        else:
+            assert len(pattern_records) == len(records), "pattern_records: other patients"
+            pairs = zip(records, pattern_records, strict=True)
+            self.items = [self._build(r, norm, q) for r, q in pairs]
 
-    def _build(self, r: PatientRecord, norm: Normalizer) -> dict:
-        item = featurize(r, norm)
+    def _build(self, r: PatientRecord, norm: Normalizer, q: PatientRecord | None = None) -> dict:
+        item = featurize(r, norm, **self.features)
+        if q is not None:
+            assert q.patient_id == r.patient_id and np.array_equal(q.hours, r.hours)
+            other = featurize(q, norm, **self.features)
+            item.update(m=other["m"], delta=other["delta"])
         T = len(r.hours)
         if self.task == "hourly":
             labels = r.labels.astype(np.float32)

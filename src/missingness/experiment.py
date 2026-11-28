@@ -101,9 +101,15 @@ def with_pattern_drop(model: nn.Module, cfg: dict) -> nn.Module:
 
 
 def make_loader(
-    records: list[PatientRecord], norm: Normalizer, task: str, batch_size: int, shuffle: bool
+    records: list[PatientRecord],
+    norm: Normalizer,
+    task: str,
+    batch_size: int,
+    shuffle: bool,
+    features: dict | None = None,
+    pattern_records: list[PatientRecord] | None = None,
 ) -> DataLoader:
-    ds = TimeSeriesDataset(records, norm, task)
+    ds = TimeSeriesDataset(records, norm, task, features, pattern_records)
     return DataLoader(ds, batch_size=batch_size, shuffle=shuffle, collate_fn=collate)
 
 
@@ -119,11 +125,18 @@ def predict(
     task: str,
     device: torch.device,
     batch_size: int = 128,
+    features: dict | None = None,
+    pattern_records: list[PatientRecord] | None = None,
 ) -> pd.DataFrame:
-    """One row per labelled step: patient_id, hour, label, score (probability)."""
+    """One row per labelled step: patient_id, hour, label, score (probability).
+
+    ``features``: the run's view (``views.feature_kwargs``). ``pattern_records``: take m and
+    delta from these records instead (channel intervention, D29).
+    """
     model.eval()
     rows = []
-    for batch in make_loader(records, norm, task, batch_size, shuffle=False):
+    loader = make_loader(records, norm, task, batch_size, False, features, pattern_records)
+    for batch in loader:
         batch = to_device(batch, device)
         prob = torch.sigmoid(model(batch)).cpu().numpy()
         mask = batch["label_mask"].cpu().numpy()

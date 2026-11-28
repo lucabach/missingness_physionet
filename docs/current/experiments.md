@@ -67,6 +67,24 @@ The first design (D21: q1 = 1.0, strength {1, 1.5, 2, 4}) saturates: the GRU fin
 perfectly at every strength (test AUROC 0.999), so it has no dose-response. Its 24 GRU runs
 stay as the saturated end (`Q1=1.0 STRENGTHS="1 1.5 2 4"`); the other models skip it (D24).
 
+## E6 Pattern-blind reference for RQ2 (D29, proposed)
+
+Forward fill lets the `values` model rebuild the mask from value changes, so it is not a clean
+reference for M2. Plan: `docs/plans/2026-11-28/15-50-RQ2PatternFreeReference/`.
+
+```bash
+python scripts/leak_audit.py --coverage       # bin coverage per width, fix the snapshot block first
+python scripts/leak_audit.py                  # -> results/leak_audit/leak_audit.csv (no training)
+python scripts/evaluate_runs.py --channel     # channel intervention on the forward-fill `all` runs
+python scripts/leak_audit.py --print-commands # 18 decoded-pattern + 36 snapshot training runs
+python scripts/evaluate_runs.py --runs '*_snapshot_*'
+```
+
+Run names carry the view: `physionet2012_gru_values_snapshot_seed0`,
+`physionet2012_gru_pattern_decoded_seed0`. Measures: `M1_decoded_gap`, `M1_bound_snapshot`,
+`M2_ref_snapshot`, `M4_thinning_ref_snapshot`, `M2_channel_pattern|values`,
+`M4_thinning_channel_pattern|values`; the snapshot check is M1 with `view = snapshot`.
+
 ## Standard evaluation and measures (D23)
 
 ```bash

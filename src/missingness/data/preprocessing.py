@@ -8,6 +8,14 @@ Definitions follow GRU-D (Che et al. 2018):
                   first measurement. In normalised units the training mean is 0.
 
 Always recompute all three from ``values`` after any perturbation, never edit them directly.
+
+Two other views of the same record exist for the RQ2 redesign (D29, proposed); both are
+derived inputs like forward fill, never edits of ``values``:
+
+    snapshot        a common schedule: one value per variable per fixed bin, shown at the bin
+                    end, so every patient has the same measurement times (``snapshot_values``)
+    decoded         m and delta rebuilt from the forward-filled x alone (``decode_mask``), to
+                    measure how much of the pattern a values-only model can read
 """
 
 from __future__ import annotations
@@ -45,6 +53,65 @@ def forward_fill(values: np.ndarray, fill_value: np.ndarray | float = 0.0) -> np
     return out
 
 
+def decode_mask(x: np.ndarray, start: float = 0.0) -> np.ndarray:
+    """Mask read off forward-filled values: 1 where x changes (or first leaves ``start``).
+
+    This is what a values-only model can see of the pattern. It misses a measurement only
+    when the new value equals the carried one exactly (or the first value equals the fill).
+    """
+    m = np.zeros_like(x, dtype=np.float32)
+    if len(x):
+        m[0] = x[0] != start
+        m[1:] = x[1:] != x[:-1]
+    return m
+
+
+def bin_ends(hours: np.ndarray, width: int) -> np.ndarray:
+    """Rows that close a bin of ``width`` hours, i.e. (hour + 1) is a multiple of the width.
+
+    Bins are anchored at ICU hour 0, the same for every patient. A last bin cut short by the
+    end of the stay has no end row and is never shown (its values would arrive at a
+    patient-specific time).
+    """
+    h = np.round(hours).astype(int)
+    return (h + 1) % width == 0
+
+
+def snapshot_values(values: np.ndarray, hours: np.ndarray, widths: np.ndarray) -> np.ndarray:
+    """Common-schedule view: per variable, the last value of each bin, placed at the bin end.
+
+    ``widths[d]`` is the bin width of variable d in hours; 0 hides the variable (all NaN).
+    Everything else is NaN, so within-bin timing, counts and busy hours are invisible. The
+    value shown at a bin end was measured at or before that hour, so the view stays causal.
+    Only an empty bin (no value at all) still differs between patients; its share is the leak
+    that remains (``scripts/leak_audit.py`` reports it).
+    """
+    T, D = values.shape
+    out = np.full((T, D), np.nan, dtype=np.float32)
+    h = np.round(hours).astype(int)
+    for d in range(D):
+        w = int(widths[d])
+        if w <= 0:
+            continue
+        ends = np.flatnonzero(bin_ends(hours, w))
+        last = forward_fill_within_bins(values[:, d], h // w)
+        out[ends, d] = last[ends]
+    return out
+
+
+def forward_fill_within_bins(col: np.ndarray, bins: np.ndarray) -> np.ndarray:
+    """Carry the last value forward, restarting (NaN) at the start of every bin."""
+    out = np.full(len(col), np.nan, dtype=np.float32)
+    last, current = np.nan, None
+    for t, (v, b) in enumerate(zip(col, bins, strict=True)):
+        if b != current:
+            last, current = np.nan, b
+        if not np.isnan(v):
+            last = v
+        out[t] = last
+    return out
+
+
 @dataclass
 class Normalizer:
     """Z-score with statistics from observed training values only."""
@@ -76,12 +143,33 @@ class Normalizer:
         return cls(**{k: np.asarray(v, dtype=float) for k, v in d.items()})
 
 
-def featurize(record: PatientRecord, norm: Normalizer) -> dict[str, np.ndarray]:
-    """Model inputs for one record. Missing static values become 0 (= training mean)."""
-    z = (record.values - norm.mean) / norm.std
-    m = compute_mask(record.values)
+FEATURE_VIEWS = ("forward_fill", "snapshot", "decoded")
+
+
+def featurize(
+    record: PatientRecord,
+    norm: Normalizer,
+    view: str = "forward_fill",
+    snapshot_widths: np.ndarray | None = None,
+) -> dict[str, np.ndarray]:
+    """Model inputs for one record. Missing static values become 0 (= training mean).
+
+    ``view``: ``forward_fill`` (default, Che et al. 2018), ``snapshot`` (common schedule with
+    ``snapshot_widths`` per variable; m and delta then describe the schedule) or ``decoded``
+    (x as usual, m and delta rebuilt from x only).
+    """
+    if view not in FEATURE_VIEWS:
+        raise ValueError(f"view must be one of {FEATURE_VIEWS}, got {view!r}")
+    values = record.values
+    if view == "snapshot":
+        if snapshot_widths is None:
+            raise ValueError("the snapshot view needs snapshot_widths")
+        values = snapshot_values(values, record.hours, snapshot_widths)
+    z = (values - norm.mean) / norm.std
+    x = forward_fill(z, 0.0)
+    m = decode_mask(x) if view == "decoded" else compute_mask(values)
     return {
-        "x": forward_fill(z, 0.0),
+        "x": x,
         "m": m,
         "delta": compute_delta(m, record.hours),
         "hours": record.hours.astype(np.float32),
