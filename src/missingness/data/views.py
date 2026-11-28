@@ -87,7 +87,15 @@ def feature_kwargs(cfg: dict) -> dict:
     return {"view": view, "snapshot_widths": np.array([widths[v] for v in names], dtype=int)}
 
 
-def feature_tag(cfg: dict) -> str:
-    """'' for forward fill; '_snapshot' or '_decoded' in the run name otherwise."""
+def view_name(cfg: dict) -> str:
+    """``forward_fill``, ``decoded``, ``snapshot`` or ``snapshot-<tag>`` (a snapshot variant
+    with its own ``data.snapshot.tag``, e.g. another ``min_coverage``)."""
     view = cfg.get("features", "forward_fill")
+    tag = (cfg["data"].get("snapshot") or {}).get("tag") if view == "snapshot" else None
+    return f"{view}-{tag}" if tag else view
+
+
+def feature_tag(cfg: dict) -> str:
+    """'' for forward fill; '_snapshot', '_snapshot-<tag>' or '_decoded' in the run name."""
+    view = view_name(cfg)
     return "" if view == "forward_fill" else f"_{view}"

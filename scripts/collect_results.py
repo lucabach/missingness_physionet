@@ -20,6 +20,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from missingness.data.views import view_name
 from missingness.paths import OUTPUT_DIR, REPO_ROOT
 from missingness.results import write_table
 
@@ -41,7 +42,7 @@ def run_info(cfg: dict, run_dir: Path) -> dict:
     """Columns that say which run a row belongs to (enough to group runs without the name)."""
     info = {"run": run_dir.name} | {k: _get(cfg, p) for k, p in RUN_KEYS.items()}
     info["data_tag"] = info["data_tag"] or info["dataset"]
-    info["view"] = cfg.get("features", "forward_fill")  # D29: forward_fill, snapshot, decoded
+    info["view"] = view_name(cfg)  # D29: forward_fill, decoded, snapshot[-<tag>]
     info["n_vars"] = len(_get(cfg, ("data", "variables")) or [])
     pl = cfg.get("planted") or {}
     info["planted_variable"] = pl.get("variable")

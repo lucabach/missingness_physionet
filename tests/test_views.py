@@ -91,6 +91,9 @@ def test_resolve_snapshot_keeps_covered_variables_and_names_the_run():
     assert widths["v0"] == 2 and widths["v4"] == 4  # synthetic rates give coverage > 0.5
     assert feature_kwargs(cfg)["snapshot_widths"].tolist() == [2, 2, 4, 4, 4]
     assert train.run_name(cfg).endswith("_all_snapshot_seed0")
+    cfg["data"]["snapshot"]["tag"] = "cov90"
+    assert train.run_name(cfg).endswith("_all_snapshot-cov90_seed0")
+    del cfg["data"]["snapshot"]["tag"]
     cfg["data"]["snapshot"] = dict(cfg["data"]["snapshot"], widths=None, min_coverage=1.01)
     resolve_snapshot(cfg, load_data(cfg)["train"])
     assert set(cfg["data"]["snapshot"]["widths"].values()) == {0}

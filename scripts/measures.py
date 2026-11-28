@@ -51,6 +51,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from missingness.data.views import view_name
 from missingness.eval import bootstrap_contrast, information_share
 from missingness.eval.metrics import METRICS
 from missingness.experiment import eval_subsets
@@ -77,7 +78,7 @@ def runs_index(outputs: Path, models: list[str] | None) -> pd.DataFrame:
                 "task": cfg["data"]["task"],
                 "model": cfg["model"]["name"],
                 "inputs": cfg["inputs"],
-                "view": cfg.get("features", "forward_fill"),
+                "view": view_name(cfg),
                 "seed": cfg["seed"],
                 "strength": round(pl["q1"] / pl["q0"], 3) if pl else None,
                 "q1": pl.get("q1"),
@@ -185,20 +186,20 @@ def cross_view_rows(plain: pd.DataFrame, add) -> None:
     """Comparisons across views (D29): decoded pattern, snapshot bound and reference."""
     for (data_tag, model, task), g in plain.groupby(["data_tag", "model", "task"]):
         key = {"task": TASK_OF[task], "data_tag": data_tag, "model": model, "view": "cross"}
-        pairs = (
-            ("M1_decoded_gap", ("forward_fill", "pattern"), ("decoded", "pattern")),
-            ("M1_bound_snapshot", ("forward_fill", "all"), ("snapshot", "values")),
-        )
-        for name, first, second in pairs:
+        pairs = [("M1_decoded_gap", ("forward_fill", "pattern"), ("decoded", "pattern"), "")]
+        for snap in sorted(v for v in g["view"].unique() if v.startswith("snapshot")):
+            suffix = snap.removeprefix("snapshot")  # '' or '-<tag>' for a snapshot variant
+            pairs.append(("M1_bound_snapshot", ("forward_fill", "all"), (snap, "values"), suffix))
+        for name, first, second, suffix in pairs:
             a, b = paired_runs(g, first, second)
             if not a:
                 continue
             test_sets = [f.stem for f in sorted((a[0] / "predictions").glob("*.parquet"))]
             for ts in test_sets:
                 groups = [[load_pred(r, ts) for r in a], [load_pred(r, ts) for r in b]]
-                add(name, key, "", ts, groups, [1, -1], task)
+                add(f"{name}{suffix}", key, "", ts, groups, [1, -1], task)
             if name == "M1_bound_snapshot":
-                m2_m4_rows("ref_snapshot", key, a, b, test_sets, task, add)
+                m2_m4_rows(f"ref_snapshot{suffix}", key, a, b, test_sets, task, add)
 
 
 def channel_rows(plain: pd.DataFrame, add) -> None:
